@@ -242,20 +242,32 @@ partes [] = [[]]
 partes (x:xs) = partes xs ++ agregar x (partes xs)
 
 -- 15 ii
+-- solucion en la clase, recursion de pila. Hay que meter la cabeza en todas las posiciones
+permutaciones:: [a] -> [[a]]
+permutaciones [] = [[]] -- ([]:[])
+-- permutacines (a:[]) = [[a]]
+permutaciones (x:xs) = insertarElem x (permutaciones xs)
 
--- agregar2 ::  [[a]] -> [a] -> [[a]]
--- agregar2 [[]] x = [x]
--- agregar2 (xs:xss) (a:as) = 
+insertarElem :: a -> [[a]] -> [[a]]
+insertarElem x [] = []
+insertarElem x (a:as) = (insertar x a) ++ (insertarElem x as) -- aca se puede usar ++ porque son del mismo tipo
 
--- rev2 :: [[a]] -> [[a]]
--- rev2 [[]] = [[]]
--- rev2 (a:[]) = [a]
--- rev2 (a:as) = (rev a):(rev2 as)
 
--- perms::[Int] -> [[Int]] 
--- perms [] = [[]]
--- perms (a:[]) = [[a]]
--- perms (a:as) = perms(rev as) ++ agregar a (perms(rev as)) ++ rev2(agregar a (perms(as)))
+insertar:: a -> [a] ->[[a]] -- la cantidad de posiciones en las que puede ir va desde 0 hasta la longitud de la lista
+insertar x [] = [[x]]
+insertar x xs = insertarPosLista [0..(length xs)] x xs
+
+insertarPosLista:: [Int] -> a -> [a] -> [[a]]
+insertarPosLista [] x xs = []
+insertarPosLista (p:ps) x xs = ((insertarPos p x xs)):((insertarPosLista ps x xs))
+
+insertarPos:: Int -> a -> [a] -> [a]
+insertarPos n x xs = (take n xs) ++ x:(drop n xs) -- arrancamos en 0
+
+-- take, toma los n primeros elementos de la lista
+-- drop, elimina los n primeros elementos de la lista
+
+-- solucion de Fran
 -- idea: agregar la cabeza a todas las permutaciones de la reversa resto
 insertaEnTodasPos :: a -> [a] -> [[a]]
 insertaEnTodasPos x [] = [[x]]
@@ -268,3 +280,7 @@ perms :: [a] -> [[a]]
 perms [] = []
 perms [x] = [[x]]
 perms (x:xs) = añadir x (perms xs)
+
+{-
+comentario multilinea
+-}

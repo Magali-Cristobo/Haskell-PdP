@@ -1,30 +1,15 @@
 -- Definir la función hanoi, que dada una cierta cantidad de discos (mayor a cero), devuelva la lista de movimientos (de poste a poste) que deberían realizarse para resolver el juego de las torres de Hanoi. Especificar cómo son los tipos Poste y Movimiento.
-type Poste = [Int] -- es mas una pila que otra cosa
-type Movimiento = (Poste, Poste, Poste) -- (posteInicial, posteFinal) siempre se desapila el primero entonces saque el parametro de disco.
+-- type Poste = [Int] -- es mas una pila que otra cosa no era asi al final
+type Movimiento = (Poste, Poste) -- (posteInicial, posteFinal) siempre se desapila el primero entonces saque el parametro de disco. Estaba bien!!
+data Poste = Origen | Destino | Auxiliar deriving (Eq, Show)
 
-poste1 :: Poste
-poste1 = [1,2,3,4,5]
+hanoi :: Int -> [Movimiento] -- se puede poner el tipo movimientos para evitar la lista
+hanoi n = hanoi2 n Origen Auxiliar Destino 
+-- origen -> auxiliar      auxiliar -> destino
 
-
-mover :: Poste -> Poste -> Poste -> Movimiento
-mover (a:as) [] [] = (as ,[],[a]) 
-mover (a:as) (b:bs) (c:cs) = if a < c then (as, (b:bs),[a] ++ (c:cs)) else ((a:as),(b:bs), (c:cs))  -- no se si es correcto, pero es la idea
-
--- Otra forma, con Data: movimiento tiene disco -> poste -> poste
--- data Movimiento = (numero,posteInicial, posteFinal)
--- data Movimiento = Mov Poste Poste deriving Show -- creo q no hace falta el int, no importa cuantos elementos haya, siempre muevo de a uno
-
-hanoi :: Int -> [Movimiento]
-hanoi 0 = [([],[],[])]
-hanoi n = [mover [x | x <- [1..n]] [] []] ++ [mover [x | x <- [2..n]] [] []] -- no funciona
-
-
--- la formula es 2^n - 1
--- mover :: Poste -> Poste -> Movimiento
--- mover [] [] = Mov [] []
--- mover (a:as) [] = Mov as [a]
--- mover (a:as) (b:bs) = if a < b then Mov as ([a] ++ (b:bs)) else Mov (a:as) (b:bs) -- no se si es correcto, pero es la idea
-
+hanoi2 :: Int -> Poste -> Poste -> Poste -> [Movimiento]
+hanoi2 0 po pd pa = []
+hanoi2 n po pd pa = (hanoi2 (n-1) po pa pd) ++ ((po, pd):(hanoi2 (n-1) pa pd po)) -- cambiamos los roles de cada poste
 
 -- 2 Definir el tipo Extension, que “agrega” un elemento indefinido a otro tipo dado
 data Extension a = Nada | Solo a deriving Show
@@ -60,7 +45,15 @@ suma2 n m = if (esCero n) then m else Suc (suma2 (predecesor n) m)
 
 resta:: Nat -> Nat -> Nat
 resta n Cero = n
-resta n m = if (esCero m) then n else Suc (resta (sucesor? n) m)
+-- resta n m = if (esCero m) then n else Suc (resta (sucesor? n) m)
+
+producto :: Nat -> Nat -> Nat
+producto n (Suc m) = if n == Cero || m == Cero then Cero else suma n (producto n m )
+
+menorIgual :: Nat -> Nat -> Bool
+menorIgual n Cero = n == Cero
+menorIgual Cero n = True
+menorIgual (Suc n) (Suc m) = menorIgual n m 
 -- 5
 
 -- data LambdaTerm = Crear [Lambda]
