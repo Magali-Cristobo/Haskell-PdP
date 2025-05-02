@@ -54,6 +54,84 @@ menorIgual :: Nat -> Nat -> Bool
 menorIgual n Cero = n == Cero
 menorIgual Cero n = True
 menorIgual (Suc n) (Suc m) = menorIgual n m 
--- 5
+
+-- 5 tiene que ver con el calculo lambda, aun no lo vimos
 
 -- data LambdaTerm = Crear [Lambda]
+
+-- 6 Definir el tipo ListOrd (lista ordenada). La diferencia con las listas comunes es que la inserción de un dato a la lista lo hace en forma ordenada. Crear funciones similares a la del tipo lista y una función de conversión a lista común.
+data ListaOrd a = LO [a] deriving (Eq, Ord, Show)
+
+insertar :: Ord a => a  -> ListaOrd a -> ListaOrd a
+insertar n (LO []) = LO [n]
+-- insertar n (LO (a:as)) = if n >= a then (a:(LO(insertar n (LO as)))) else LO (n:(a:as)) -- no me dejaba poner esto
+insertar n (LO (a:as)) = if n >= a then LO (a:az)  else LO (n:(a:as)) where LO az = insertar n (LO as)
+
+-- otra forma
+insert :: Ord a => a -> ListaOrd a -> ListaOrd a
+insert x (LO xs) = LO (insert' x xs) where insert' x [] = [x]
+                                           insert' x (y:ys) = if x<=y then (x:(y:ys)) else (y:insert' x ys)
+
+{- 7
+si definimos un tipo con participacion de otro, estamos limitando el uso justamente para ese tipo, si lo hacemos sin ningun tipo existente, tenemos mas posibilidades
+de que se aplique a cualquier tipo existente, pero es probable que se requiera que ese tipo sea de algunas clases como show, eq, ord, etc
+Creo que no preguntaba esto
+-}
+
+-- 8 Definir el tipo Pila con funciones crear, esVacia, cabeza, agregar, sacar y cantidad. Idem con el tipo Cola.
+data Pila a = PL [a]  deriving (Show)
+
+crear:: a -> Pila a
+crear x = PL [x]
+
+esVacia:: Pila a -> Bool
+esVacia (PL [])  = True
+esVacia (PL xs) = False
+
+cabezaP:: Pila a -> a
+cabezaP (PL (a:as)) = a 
+
+agregarP:: Pila a -> a -> Pila a
+agregarP (PL []) x = PL [x]
+agregarP (PL xs) x =  PL (x:xs) 
+
+sacarP:: Pila a -> Pila a
+sacarP (PL []) = PL []
+sacarP (PL (a:as)) = PL as
+
+cantidadP :: Pila a -> Int
+cantidadP (PL []) = 0 
+cantidadP (PL (a:as)) = 1 + (cantidadP (PL as))
+
+data Cola a = CL [a]  deriving (Show)
+
+crearC:: a -> Cola a
+crearC x = CL [x]
+
+esVaciaC:: Cola a -> Bool
+esVaciaC (CL [])  = True
+esVaciaC (CL xs) = False
+
+cabezaC:: Cola a -> a
+cabezaC (CL (a:[])) = a
+cabezaC (CL (a:as)) = cabezaC (CL as)
+
+agregarC:: Cola a -> a -> Cola a
+agregarC (CL []) x = CL [x]
+agregarC (CL xs) x =  CL (x:xs) 
+
+sacarC:: Cola a -> Cola a
+sacarC (CL (a:[])) = CL []
+sacarC (CL (a:as)) = CL(a:az) where CL az = sacarC (CL as)
+
+cantidadC :: Cola a -> Int
+cantidadC (CL []) = 0 -- esto no deberia estar
+cantidadC (CL (a:as)) = 1 + (cantidadC (CL as))
+
+-- 9 i Definir el tipo ArbBin (árbol binario rotulado) con sus funciones constructoras y selectoras.
+data ArbBin a = Hoja a | Nodo a (ArbBin a) (ArbBin a) deriving Show
+
+crearArbol :: a -> ArbBin a -> ArbBin a -> ArbBin a
+crearArbol a si sd = Nodo a si sd
+
+-- crearArbolVacio?
