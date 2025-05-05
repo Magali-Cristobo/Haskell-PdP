@@ -135,3 +135,116 @@ crearArbol :: a -> ArbBin a -> ArbBin a -> ArbBin a
 crearArbol a si sd = Nodo a si sd
 
 -- crearArbolVacio?
+nroNodos :: ArbBin a -> Int
+nroNodos (Hoja n) = 0
+nroNodos (Nodo a si sd) = 1+ (nroNodos si) + (nroNodos sd)
+
+nroHojas :: ArbBin a -> Int
+nroHojas (Hoja n) = 1
+nroHojas (Nodo a si sd) = (nroHojas si) + (nroHojas sd)
+
+altura:: ArbBin a -> Int
+altura (Hoja n) = 1
+altura (Nodo a si sd) = 1 +  maximo (altura si) (altura sd)
+
+maximo:: Int -> Int -> Int
+maximo n m = if n > m then n else m
+
+preorden:: ArbBin a -> [a]
+preorden (Hoja r) = [r]
+preorden (Nodo r si sd) = [r] ++ (preorden si) ++ (preorden sd)
+
+inorden:: ArbBin a -> [a]
+inorden (Hoja r) = [r]
+inorden (Nodo r si sd) =  (inorden si) ++ [r] ++ (inorden sd)
+
+posOrden:: ArbBin a -> [a]
+posOrden (Hoja r) = [r]
+posOrden (Nodo r si sd) =  (posOrden si) ++ (posOrden sd) ++ [r] 
+
+igEstrucArb :: ArbBin a -> ArbBin a -> Bool
+igEstrucArb (Hoja a) (Hoja b) = True
+igEstrucArb (Nodo a si sd) (Hoja b) = False
+igEstrucArb  (Hoja b) (Nodo a si sd)  = False
+igEstrucArb  (Nodo a si sd)(Nodo b sii sdd) = (igEstrucArb si sii) && (igEstrucArb sd sdd)
+
+-- 10
+data ArbBinRotHoj a = HojaRot a | NodoSinRot (ArbBin a) (ArbBin a) deriving Show
+
+-- 11
+data ArbGen a = HojaGen a | NodoGen a [ArbGen a]  deriving Show
+
+crearArbolGen :: a -> [ArbGen a] -> ArbGen a
+crearArbolGen a ds = (NodoGen a ds)
+
+-- crearArbolVacio?
+nroNodosGen :: ArbGen a -> Int
+nroNodosGen (HojaGen n) = 0
+nroNodosGen (NodoGen a (x:xs)) = 1 + (nroNodosGen x) + (nroNodosGen2 xs)
+
+nroNodosGen2 :: [ArbGen a] -> Int
+nroNodosGen2 [] = 0
+nroNodosGen2 (a:as) = nroNodosGen (a) + nroNodosGen2 (as)
+
+
+nroHojasGen :: ArbGen a -> Int
+nroHojasGen (HojaGen n) = 1
+nroHojasGen (NodoGen n (a:as)) = (nroHojasGen a) + (nroHojasGen2 as)
+
+nroHojasGen2 :: [ArbGen a] -> Int
+nroHojasGen2 [] = 0
+nroHojasGen2 (a:as) = (nroHojasGen a) + (nroHojasGen2 as)
+
+maxl :: [Int] -> Int --suponemos que es una lista de enteros
+maxl (a:[]) = a
+maxl (a:as) = if a> maxl as then a else maxl as
+
+alturaGen:: ArbGen a -> Int
+alturaGen (HojaGen n) = 1
+alturaGen (NodoGen n (a:as)) = 1 +  maxl ((alturaGen a) :(alturaGen2 as))
+
+alturaGen2:: [ArbGen a] -> [Int]
+alturaGen2 [] = []
+alturaGen2 (a:as) =  ((alturaGen a) : (alturaGen2 as))
+
+preordenGen:: ArbGen a -> [a]
+preordenGen (HojaGen r) = [r]
+preordenGen (NodoGen r (a:as)) = [r] ++ (preordenGen a) ++ (preordenGen2 as)
+
+preordenGen2:: [ArbGen a] -> [a]
+preordenGen2 [] = []
+preordenGen2 ((a:as)) = (preordenGen a) ++ (preordenGen2 as)
+
+inordenGen:: ArbGen a -> [a]
+inordenGen (HojaGen r) = [r]
+inordenGen (NodoGen r (a:as)) =  (inordenGen a) ++ [r] ++ (inordenGen2 as)
+
+inordenGen2:: [ArbGen a] -> [a]
+inordenGen2 [] = []
+inordenGen2 ((a:as)) = (inordenGen a) ++ (inordenGen2 as)
+
+posordenGen:: ArbGen a -> [a]
+posordenGen (HojaGen r) = [r]
+posordenGen (NodoGen r (a:as)) =  (posordenGen a) ++  (posordenGen2 as) ++ [r]
+
+posordenGen2:: [ArbGen a] -> [a]
+posordenGen2 [] = []
+posordenGen2 ((a:as)) = (posordenGen a) ++ (posordenGen2 as)
+
+long :: [a] -> Int
+long [] = 0
+long (a:as) = 1 + long (as)
+
+igEstrucArbGen :: ArbGen a -> ArbGen a -> Bool
+igEstrucArbGen (HojaGen a) (HojaGen b) = True
+igEstrucArbGen (NodoGen a (x:xs)) (HojaGen b) = False
+igEstrucArbGen  (HojaGen b) (NodoGen a (x:xs))  = False
+igEstrucArbGen  (NodoGen a (x:xs)) (NodoGen b (y:ys)) = (long xs) == (long ys) && (igEstrucArbGen2 xs ys)
+
+igEstrucArbGen2 :: [ArbGen a] -> [ArbGen a] -> Bool
+igEstrucArbGen2 [] [] = True
+igEstrucArbGen2 [] xs = False
+igEstrucArbGen2 xs [] = False
+igEstrucArbGen2 (x:xs) (y:ys) = (igEstrucArbGen x y) && (igEstrucArbGen2 xs ys)
+
+-- 12 
