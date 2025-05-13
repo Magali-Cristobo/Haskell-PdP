@@ -248,3 +248,37 @@ igEstrucArbGen2 xs [] = False
 igEstrucArbGen2 (x:xs) (y:ys) = (igEstrucArbGen x y) && (igEstrucArbGen2 xs ys)
 
 -- 12 
+data Conjunto a = C [a] deriving (Show, Eq, Ord)
+
+esVacio:: Conjunto a -> Bool
+esVacio (C[]) = True
+esVacio (C x) = False 
+
+union:: Eq a => Conjunto a -> Conjunto a -> Conjunto a
+union (C[]) (C y) = (C y) 
+union (C x) (C []) = (C x) 
+union (C x) (C y) = (C (appendC x y))
+
+member :: Eq a => [a] -> a -> Bool
+member [] a = False
+member (x:xs) a = if x == a then True else (member xs a) 
+
+appendC:: Eq a => [a] -> [a] -> [a]
+appendC [] y = y
+appendC x  [] = x
+appendC (x:xs) (y:ys) = if (member (y:ys) x) then (appendC xs (y:ys)) else ([x] ++ appendC xs (y:ys))
+
+agElem:: Eq a => Conjunto a -> a -> Conjunto a
+agElem (C [] ) x = (C [x])
+agElem (C xs) x = if not(member xs x) then ((C ([x]++ xs))) else (C xs)
+
+interseccion:: Eq a => Conjunto a -> Conjunto a -> Conjunto a
+interseccion (C []) _ = (C [])
+interseccion _ (C []) = (C [])
+interseccion (C (x:xs)) (C (y:ys)) = if ((member ys x) || x == y) then (agElem (interseccion (C xs) (C (y:ys)) ) x ) else (interseccion (C xs) (C (y:ys)))
+
+sacElem:: Eq a => Conjunto a -> a -> Conjunto a
+sacElem (C []) x = (C [])
+sacElem (C (a:as)) x = if x == a then (C as) else (agElem(sacElem (C as) x) a)
+
+-- 13. Definir el tipo Matriz de números con operaciones de suma, trasposición y producto.
