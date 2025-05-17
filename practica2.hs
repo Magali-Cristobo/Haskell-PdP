@@ -282,3 +282,4 @@ sacElem (C []) x = (C [])
 sacElem (C (a:as)) x = if x == a then (C as) else (agElem(sacElem (C as) x) a)
 
 -- 13. Definir el tipo Matriz de números con operaciones de suma, trasposición y producto.
+
