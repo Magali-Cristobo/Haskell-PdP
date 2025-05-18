@@ -46,6 +46,10 @@ foldL :: (b -> a -> b) -> b -> [a] -> b
 foldL f x [] = x
 foldL f x (y:ys) = foldL f (f x y) ys
 
+zipWithB:: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWithB f [] ys = []
+zipWithB f (x:xs) [ ] = []
+zipWithB f (x:xs) (y:ys) = ((f x y): (zipWithB f xs ys))
 
 -- all si todos los elementos de la lista cumplen un criterio 
 -- all :: (a -> Bool) -> [a] - Bool
@@ -154,3 +158,83 @@ f :: (a, (b, c)) -> d
 -- no se me ocurre como hacerlo porque no sabemos la cantidad de parametros que vamos a tener, no podemos tener n parametros
 
 --8i Definir las versiones currificadas y no currificadas suma de dos enteros y division entera de dos enteros.
+sumaInt::Int -> Int -> Int
+sumaInt a b = a + b
+
+sumaIntB::(Int, Int) -> Int
+sumaIntB (a, b) =  a + b
+
+divInt::Int -> Int -> Int
+divInt a b = a `div` b
+
+divIntB:: (Int, Int) -> Int
+divIntB (a, b) = a `div` b
+
+-- 8ii Definir --usando funciones currificadas anteriores-- a las funciones sucesor de un entero, predecesor de un entero, mitad de un entero y dosVeces la aplicación de una función.
+sucesor:: Int -> Int
+sucesor a = sumaInt a 1
+
+-- otra forma
+-- predecesor:: Int -> Int
+-- predecesor 1 = 0
+-- predecesor n = sumaInt 0 n-1
+
+predecesor:: Int -> Int
+predecesor = sumaInt (-1)
+
+mitad::Int -> Int
+mitad = divInt `flip` 2
+-- mitad n = divInt n 2
+-- mitad n = divInt  `flip` 2 n
+-- mitad = divInt `flip` 2
+
+dosVeces :: (a -> a) -> a -> a
+dosVeces f  = f . f
+-- dosVeces f  x = f (f x) 
+
+
+
+-- 8 iii Definir cuatroVeces usando dosVeces.
+cuatroVeces:: (a -> a) -> a -> a
+cuatroVeces = dosVeces . dosVeces
+
+-- cuatroVeces f x = dosVeces f (dosVeces f x)
+
+-- cuatroVeces f = dosVeces (\ x -> (dosVeces f x)  ) 
+-- cuatroVeces f = dosVeces (dosVeces f ) 
+-- -- cuatroVeces = dosVeces . dosVeces
+
+
+
+-- 9i Programar la función no currificada separar, que dada una condición y una lista devuelva un par de listas donde la primera esté conformada por aquellos elementos de la lista original que cumplan con la condición, y la segunda, por aquellos que no la cumplen.
+separar:: (a -> Bool) -> [a] -> ([a], [a])
+separar c [] = ([], [])
+separar c (x:xs) = if (c x ) then (([x] ++ fst(separar c xs)), snd(separar c xs)) else (fst(separar c xs), ([x] ++ snd(separar c xs)))
+
+-- separar:: (a -> Bool, [a]) -> ([a], [a])
+-- separar (c, []) = ([],[])
+-- separar (c, x:xs)
+--   | c x    = (x:si, no)
+--   | otherwise = (si, x:no)
+--   where (si, no) = separar (c, xs)
+
+
+-- 9ii Programar una versión currificada de separar usando filter.
+separarF:: (a -> Bool) -> [a] -> ([a], [a])
+separarF c [] = ([], [])
+separarF c xs = (filter c xs, filter( \x -> not (c x)) xs) 
+-- separarF c xs = (filter c xs, filter(not . c ) xs) 
+
+-- 9 iii
+mayoria:: (Num a, Ord a) => a -> [[a]] -> [[a]]
+mayoria n = filter (\xs -> length (filter (>n) xs) > length (filter (<=n) xs))
+
+-- mayoria n = filter (\xs -> length (filter (\x -> x >n) xs) > length (filter ((\x -> x <= n)) xs))
+-- mayoria n = filter (\xs -> length (filter ((<) n) xs) > length (filter ((\x -> x <= n)) xs))
+
+-- 10i Programar una función de orden superior paraCada que dados dos números (índice inicial y final), un valor inicial de un dato y una función que dado un dato y un índice devuelve un dato, devuelva la aplicación sucesiva de la función dada sobre el dato inicial y cada uno de los valores desde el índice inicial hasta el final.
+paraCada:: Num a => (a -> Int -> a) -> Int -> Int -> a -> a
+paraCada f i j d = if (i > j ) then d else paraCada f (i + 1) j (f d i)
+
+--10 ii Programar una función todos que dada una lista de elementos y una condición sobre los elementos devuelva si todos los elementos de la lista cumplen con la condición. Usar paraCada, long y term. En Haskell se llama all.
+
