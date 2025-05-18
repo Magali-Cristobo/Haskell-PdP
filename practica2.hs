@@ -129,47 +129,97 @@ cantidadC (CL []) = 0 -- esto no deberia estar
 cantidadC (CL (a:as)) = 1 + (cantidadC (CL as))
 
 -- 9 i Definir el tipo ArbBin (árbol binario rotulado) con sus funciones constructoras y selectoras.
-data ArbBin a = Hoja a | Nodo a (ArbBin a) (ArbBin a) deriving Show
 
-crearArbol :: a -> ArbBin a -> ArbBin a -> ArbBin a
+data ArbBinH a b = Hoja a | Nodo b (ArbBinH a b) (ArbBinH a b) deriving Show
+
+crearArbol :: b -> ArbBinH a b -> ArbBinH a b -> ArbBinH a b
 crearArbol a si sd = Nodo a si sd
 
--- crearArbolVacio?
-nroNodos :: ArbBin a -> Int
+-- Preorden: Nodo, Izquierda, Derecha
+preordenH :: ArbBinH a b -> [Either a b]
+preordenH (Hoja h)        = [Left h]
+preordenH (Nodo r i d) = [Right r] ++ preordenH i ++ preordenH d
+
+-- Inorden: Izquierda, Nodo, Derecha
+inordenH :: ArbBinH a b -> [Either a b]
+inordenH (Hoja h)        = [Left h]
+inordenH (Nodo r i d) = inordenH i ++ [Right r] ++ inordenH d
+
+-- Postorden: Izquierda, Derecha, Nodo
+postordenH :: ArbBinH a b -> [Either a b]
+postordenH (Hoja h)        = [Left h]
+postordenH (Nodo r i d) = postordenH i ++ postordenH d ++ [Right r]
+
+nroNodos :: ArbBinH a b -> Int
 nroNodos (Hoja n) = 0
 nroNodos (Nodo a si sd) = 1+ (nroNodos si) + (nroNodos sd)
 
-nroHojas :: ArbBin a -> Int
+nroHojas :: ArbBinH a b -> Int
 nroHojas (Hoja n) = 1
 nroHojas (Nodo a si sd) = (nroHojas si) + (nroHojas sd)
 
-altura:: ArbBin a -> Int
+altura:: ArbBinH a b -> Int
 altura (Hoja n) = 1
 altura (Nodo a si sd) = 1 +  maximo (altura si) (altura sd)
 
-maximo:: Int -> Int -> Int
-maximo n m = if n > m then n else m
-
-preorden:: ArbBin a -> [a]
-preorden (Hoja r) = [r]
-preorden (Nodo r si sd) = [r] ++ (preorden si) ++ (preorden sd)
-
-inorden:: ArbBin a -> [a]
-inorden (Hoja r) = [r]
-inorden (Nodo r si sd) =  (inorden si) ++ [r] ++ (inorden sd)
-
-posOrden:: ArbBin a -> [a]
-posOrden (Hoja r) = [r]
-posOrden (Nodo r si sd) =  (posOrden si) ++ (posOrden sd) ++ [r] 
-
-igEstrucArb :: ArbBin a -> ArbBin a -> Bool
+igEstrucArb :: ArbBinH a b -> ArbBinH a b -> Bool
 igEstrucArb (Hoja a) (Hoja b) = True
 igEstrucArb (Nodo a si sd) (Hoja b) = False
 igEstrucArb  (Hoja b) (Nodo a si sd)  = False
 igEstrucArb  (Nodo a si sd)(Nodo b sii sdd) = (igEstrucArb si sii) && (igEstrucArb sd sdd)
 
+rotuloHoja:: ArbBinH a b -> Maybe a
+rotuloHoja (Hoja n) = Just n
+rotuloHoja _ = Nothing
+
+rotuloNodo:: ArbBinH a b -> Maybe b
+rotuloNodo (Nodo n si sd) = Just n
+rotuloNodo _ = Nothing
+
+
+-- si hoja y nodo truvieran un rotulo del mismo tipo
+
+-- data ArbBin a = Hoja a | Nodo a (ArbBin a) (ArbBin a) deriving Show
+
+-- crearArbol :: a -> ArbBin a -> ArbBin a -> ArbBin a
+-- crearArbol a si sd = Nodo a si sd
+
+-- -- crearArbolVacio?
+-- nroNodos :: ArbBin a -> Int
+-- nroNodos (Hoja n) = 0
+-- nroNodos (Nodo a si sd) = 1+ (nroNodos si) + (nroNodos sd)
+
+-- nroHojas :: ArbBin a -> Int
+-- nroHojas (Hoja n) = 1
+-- nroHojas (Nodo a si sd) = (nroHojas si) + (nroHojas sd)
+
+-- altura:: ArbBin a -> Int
+-- altura (Hoja n) = 1
+-- altura (Nodo a si sd) = 1 +  maximo (altura si) (altura sd)
+
+maximo:: Int -> Int -> Int
+maximo n m = if n > m then n else m
+
+-- preorden:: ArbBin a -> [a]
+-- preorden (Hoja r) = [r]
+-- preorden (Nodo r si sd) = [r] ++ (preorden si) ++ (preorden sd)
+
+-- inorden:: ArbBin a -> [a]
+-- inorden (Hoja r) = [r]
+-- inorden (Nodo r si sd) =  (inorden si) ++ [r] ++ (inorden sd)
+
+-- posOrden:: ArbBin a -> [a]
+-- posOrden (Hoja r) = [r]
+-- posOrden (Nodo r si sd) =  (posOrden si) ++ (posOrden sd) ++ [r] 
+
+-- igEstrucArb :: ArbBin a -> ArbBin a -> Bool
+-- igEstrucArb (Hoja a) (Hoja b) = True
+-- igEstrucArb (Nodo a si sd) (Hoja b) = False
+-- igEstrucArb  (Hoja b) (Nodo a si sd)  = False
+-- igEstrucArb  (Nodo a si sd)(Nodo b sii sdd) = (igEstrucArb si sii) && (igEstrucArb sd sdd)
+
 -- 10
-data ArbBinRotHoj a = HojaRot a | NodoSinRot (ArbBin a) (ArbBin a) deriving Show
+data ArbBinRotHoj a = HojaRot a | NodoSinRot (ArbBinRotHoj a) (ArbBinRotHoj a) deriving Show
 
 -- 11
 data ArbGen a = HojaGen a | NodoGen a [ArbGen a]  deriving Show
@@ -282,4 +332,22 @@ sacElem (C []) x = (C [])
 sacElem (C (a:as)) x = if x == a then (C as) else (agElem(sacElem (C as) x) a)
 
 -- 13. Definir el tipo Matriz de números con operaciones de suma, trasposición y producto.
+type Matriz a = [[a]]
+sumarDosListas:: Num a => [a] -> [a] -> [a]
+sumarDosListas [] ys = ys
+sumarDosListas xs [] = xs
+sumarDosListas (x:xs) (y:ys) = ((x + y):(sumarDosListas xs ys))
 
+sumaMat:: Num a => Matriz a -> Matriz a -> Matriz a
+sumaMat [] yss = yss
+sumaMat xss [] = xss
+sumaMat (xs:xss) (ys:yss) = ((sumarDosListas xs ys): (sumaMat xss yss))
+
+trasp:: Matriz a -> Matriz a
+trasp ([]:_) = []
+trasp mat =  map head mat : trasp (map tail mat)
+
+productoMatrices :: Num a => Matriz a -> Matriz a -> Matriz a
+productoMatrices a b =
+  let bt = trasp b
+  in map (\fila -> map (\col -> sum (zipWith (*) fila col)) bt) a
