@@ -236,6 +236,9 @@ nroNodosGen2 :: [ArbGen a] -> Int
 nroNodosGen2 [] = 0
 nroNodosGen2 (a:as) = nroNodosGen (a) + nroNodosGen2 (as)
 
+-- otra forma
+-- nroNodosGen (HojaGen n) = 0
+-- nroNodosGen (NodoGen a xs) = sum(map nroNodosGen xs)
 
 nroHojasGen :: ArbGen a -> Int
 nroHojasGen (HojaGen n) = 1
@@ -245,6 +248,10 @@ nroHojasGen2 :: [ArbGen a] -> Int
 nroHojasGen2 [] = 0
 nroHojasGen2 (a:as) = (nroHojasGen a) + (nroHojasGen2 as)
 
+-- otra forma
+-- nroHojasGen (NodoGen _ []) = 1
+-- nroHojasGen (NodoGen _ xs) = sum (map nroHojasGen xs) 
+
 maxl :: [Int] -> Int --suponemos que es una lista de enteros
 maxl (a:[]) = a
 maxl (a:as) = if a> maxl as then a else maxl as
@@ -252,6 +259,7 @@ maxl (a:as) = if a> maxl as then a else maxl as
 alturaGen:: ArbGen a -> Int
 alturaGen (HojaGen n) = 1
 alturaGen (NodoGen n (a:as)) = 1 +  maxl ((alturaGen a) :(alturaGen2 as))
+-- alturaGen (NodoGen _ xs) = 1 + maxl (map alturaGen xs)
 
 alturaGen2:: [ArbGen a] -> [Int]
 alturaGen2 [] = []
@@ -259,7 +267,8 @@ alturaGen2 (a:as) =  ((alturaGen a) : (alturaGen2 as))
 
 preordenGen:: ArbGen a -> [a]
 preordenGen (HojaGen r) = [r]
-preordenGen (NodoGen r (a:as)) = [r] ++ (preordenGen a) ++ (preordenGen2 as)
+-- preordenGen (NodoGen r (a:as)) = [r] ++ (preordenGen a) ++ (preordenGen2 as)
+preordenGen (NodoGen r as) = [r] ++ concatMap preordenGen as
 
 preordenGen2:: [ArbGen a] -> [a]
 preordenGen2 [] = []
@@ -275,7 +284,9 @@ inordenGen2 ((a:as)) = (inordenGen a) ++ (inordenGen2 as)
 
 posordenGen:: ArbGen a -> [a]
 posordenGen (HojaGen r) = [r]
-posordenGen (NodoGen r (a:as)) =  (posordenGen a) ++  (posordenGen2 as) ++ [r]
+-- posordenGen (NodoGen r (a:as)) =  (posordenGen a) ++  (posordenGen2 as) ++ [r]
+posordenGen (NodoGen r as) =  concatMap preordenGen as ++ [r]
+
 
 posordenGen2:: [ArbGen a] -> [a]
 posordenGen2 [] = []
@@ -289,7 +300,9 @@ igEstrucArbGen :: ArbGen a -> ArbGen a -> Bool
 igEstrucArbGen (HojaGen a) (HojaGen b) = True
 igEstrucArbGen (NodoGen a (x:xs)) (HojaGen b) = False
 igEstrucArbGen  (HojaGen b) (NodoGen a (x:xs))  = False
-igEstrucArbGen  (NodoGen a (x:xs)) (NodoGen b (y:ys)) = (long xs) == (long ys) && (igEstrucArbGen2 xs ys)
+-- igEstrucArbGen  (NodoGen a (x:xs)) (NodoGen b (y:ys)) = (long xs) == (long ys) && (igEstrucArbGen2 xs ys)
+igEstrucArbGen  (NodoGen a xs) (NodoGen b ys) = (long xs) == (long ys) && and (zipWith igEstrucArbGen xs ys)
+
 
 igEstrucArbGen2 :: [ArbGen a] -> [ArbGen a] -> Bool
 igEstrucArbGen2 [] [] = True
