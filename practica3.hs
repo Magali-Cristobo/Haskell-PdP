@@ -19,9 +19,9 @@ sacaParesOS:: [Int] -> [Int]
 -- sacaParesOS = filterOS (\x -> odd x)
 sacaParesOS = filterOS odd 
 
-mapOS::(a -> b) -> [a] -> [b]
-mapOS f [] = []
-mapOS f (x:xs) = f x : mapOS f xs
+-- mapOS::(a -> b) -> [a] -> [b]
+-- mapOS f [] = []
+-- mapOS f (x:xs) = f x : mapOS f xs
 
 map2::(a -> b) -> [[a]] -> [[b]]
 map2 f [ ] = []
@@ -234,18 +234,60 @@ mayoria n = filter (\xs -> length (filter (>n) xs) > length (filter (<=n) xs))
 
 -- 10i Programar una función de orden superior paraCada que dados dos números (índice inicial y final), un valor inicial de un dato y una función que dado un dato y un índice devuelve un dato, devuelva la aplicación sucesiva de la función dada sobre el dato inicial y cada uno de los valores desde el índice inicial hasta el final.
 paraCada:: (a -> Int -> a) -> Int -> Int -> a -> a
-paraCada f i j d = if (i > j ) then d else paraCada f (i + 1) j (f d i)
+paraCada f i j d = if (i == j ) then d else paraCada f (i + 1) j (f d i)
 
 --10 ii Programar una función todos que dada una lista de elementos y una condición sobre los elementos devuelva si todos los elementos de la lista cumplen con la condición. Usar paraCada, long y term. En Haskell se llama all.
 todos :: (a -> Bool) -> [a] -> Bool
 todos c xs = paraCada (\ x i -> x && c (term xs i)) 0 (long xs) True
 
 term :: [a] -> Int -> a
--- term [] n = "error"
-term (a:as) 1 = a -- pongo 1 porque considero que esa es la primera posicion, sino seria 0
-term (a:as) n = term as (n-1)
+term (a:_) 0 = a 
+term (_:as) n = term as (n - 1)
 
 long :: [a] -> Int
 long [] = 0
 long (a:as) = 1 + long (as)
 
+ninguno :: (a -> Bool) -> [a] -> Bool
+ninguno c xs = todos (\ x -> not (c x)) xs
+
+igLong:: [[a]] -> Bool
+igLong [] = True
+igLong xss = todos (\xs -> (long xs) == long (ultimo xss)) xss
+
+-- 11i Definir la función while, que dado un valor, una función que represente una condición y una función de transformación, devuelva la aplicación sucesiva de la función de transformación sobre el valor dado mientras se cumpla la función-condición dada. Si el valor inicial cumple la función-condición, ese valor deberá ser el devuelto.
+while::(a -> Bool) -> (a -> a) -> a -> a
+while c f n = if c n then (while c f (f n)) else n
+
+--11 ii Definir la función until, que dado un valor, una función que represente una condición y una función de transformación, devuelva la aplicación sucesiva de la función de transformación sobre el valor dado hasta que se cumpla la función-condición dada. La función de transformación debe aplicarse una vez como mínimo.
+untilB:: (a -> Bool) -> (a -> a) -> a -> a
+untilB c f n = if not(c n) then n else (untilB c f (f n))
+
+--11 iii definir ultimo usando while
+ultimoB:: [a] -> a -- tenemos que quedarnos con la cabeza y el resto si o si, usamos una tupla.
+ultimoB xs = snd (while (\ (xs, s) -> not (null (tail xs))) (\ (xs , s) -> (tail xs, head (tail xs))) (xs, head xs))
+
+--11 iv Definir long, append, sumaLista y genLista usando while. Comparar estas funciones con las equivalentes realizadas en un lenguaje imperativo usando la estructura de control de iteración.
+longB:: [a] -> Int
+longB xs = snd (while (\ (xs, s) -> not (null xs)) (\ (xs, s) -> (tail xs, s+1)) (xs, 0))
+
+appendB:: [a] -> [a] -> [a]
+appendB xs ys = fst (while (\ (xs, ys) -> not (null ys)) (\ (xs, ys) -> (((head (ys)):xs), tail ys)) (ys, xs))
+
+sumaLista:: [Int] -> Int
+sumaLista xs = snd (while (\ (xs, _) ->  not (null xs)) (\ (xs, c) -> (tail xs, c + head xs)) (xs, 0))
+
+genListaB:: (a -> a) -> Int -> a -> [a]
+genListaB f n d = fst (while (\ (x, l) -> 0 < l ) (\ (x, l) -> (x ++ [f (last x)], l-1)) ([d], n))
+
+-- 12i Definir una función currificada map, que dada una función y una lista como argumentos, devuelve otra lista que es el resultado de aplicar la función original (elemento a elemento) a cada uno de los elementos de la lista original.
+mapOS::(a -> b) -> [a] -> [b]
+mapOS f [] = []
+mapOS f (x:xs) = f x : mapOS f xs
+
+mapn:: ((a -> b), [a]) -> [b]
+mapn (f , []) = []
+mapn (f , (x:xs)) = f x : mapn (f, xs)
+-- mapn (f, xs) = map f xs usando map
+
+--13i 
