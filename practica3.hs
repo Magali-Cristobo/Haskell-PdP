@@ -52,8 +52,8 @@ zipWithB f (x:xs) [ ] = []
 zipWithB f (x:xs) (y:ys) = ((f x y): (zipWithB f xs ys))
 
 -- all si todos los elementos de la lista cumplen un criterio 
--- all :: (a -> Bool) -> [a] - Bool
--- all _ [] = []
+-- all :: (a -> Bool) -> [a] -> Bool
+-- all _ [] = True
 -- all condicion (x:xs) = condicion x && all condicion xs
 
 hacerNVeces 0 f valor = valor
@@ -233,8 +233,19 @@ mayoria n = filter (\xs -> length (filter (>n) xs) > length (filter (<=n) xs))
 -- mayoria n = filter (\xs -> length (filter ((<) n) xs) > length (filter ((\x -> x <= n)) xs))
 
 -- 10i Programar una función de orden superior paraCada que dados dos números (índice inicial y final), un valor inicial de un dato y una función que dado un dato y un índice devuelve un dato, devuelva la aplicación sucesiva de la función dada sobre el dato inicial y cada uno de los valores desde el índice inicial hasta el final.
-paraCada:: Num a => (a -> Int -> a) -> Int -> Int -> a -> a
+paraCada:: (a -> Int -> a) -> Int -> Int -> a -> a
 paraCada f i j d = if (i > j ) then d else paraCada f (i + 1) j (f d i)
 
 --10 ii Programar una función todos que dada una lista de elementos y una condición sobre los elementos devuelva si todos los elementos de la lista cumplen con la condición. Usar paraCada, long y term. En Haskell se llama all.
+todos :: (a -> Bool) -> [a] -> Bool
+todos c xs = paraCada (\ x i -> x && c (term xs i)) 0 (long xs) True
+
+term :: [a] -> Int -> a
+-- term [] n = "error"
+term (a:as) 1 = a -- pongo 1 porque considero que esa es la primera posicion, sino seria 0
+term (a:as) n = term as (n-1)
+
+long :: [a] -> Int
+long [] = 0
+long (a:as) = 1 + long (as)
 
