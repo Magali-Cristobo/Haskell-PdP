@@ -364,3 +364,90 @@ productoMatrices :: Num a => Matriz a -> Matriz a -> Matriz a
 productoMatrices a b =
   let bt = trasp b
   in map (\fila -> map (\col -> sum (zipWith (*) fila col)) bt) a
+
+-- 14 Definir el tipo secuencia de numeros 
+data Seq a = Seq [a] Int deriving (Eq, Show)
+
+crearSecVac:: a -> Seq a
+crearSecVac n = Seq [] 0
+
+regAct :: Int -> Seq a -> Seq a
+regAct n (Seq xs _)
+  | n < 1 || n > length xs = error "Error: número de registro inválido"
+  | otherwise = (Seq xs (n - 1))
+
+
+leerReg :: Seq a -> (Maybe a, Seq a)
+leerReg (Seq xs p) = if p >= length xs then (Nothing, Seq xs p) else (Just (xs!!p), Seq xs (p+1))
+
+primeroSeq :: Seq a -> a
+primeroSeq s1 = v1 where (Just v1,s2) = leerReg s1
+
+segundoSeq :: Seq a -> a
+segundoSeq s1 = v2 where (Just v1,s2) = leerReg s1
+                         (Just v2,s3) = leerReg s2
+
+borrReg :: Seq a -> Seq a
+borrReg (Seq _ (-1)) = error "Error: no hay registro activo para borrar"
+borrReg (Seq xs i)
+  | i < 0 || i >= length xs = error "Error: índice fuera de rango"
+  | otherwise =
+      let xs' = take i xs ++ drop (i + 1) xs
+       in (Seq xs' (-1))
+
+agReg :: a -> Seq a -> Seq a
+agReg x (Seq xs _) = Seq (xs ++ [x]) (-1)
+
+numAct :: Seq a -> Int
+numAct (Seq _ (-1)) = error "Error: no hay registro activo"
+numAct (Seq _ i) = (i + 1)
+
+
+-- 15 Definir el tipo ConjInf (conjuntos posiblemente infinitos) a partir de funciones características (dado un dato dice si pertenece o no al conjunto). Definir funciones similares a las del tipo conjunto (sin la función esVacio).
+data ConjInf a = ConjInf (a-> Bool)
+pertenece:: ConjInf a -> a -> Bool
+pertenece (ConjInf f) x = f x
+
+unionConjInf :: ConjInf a -> ConjInf a -> ConjInf a
+unionConjInf (ConjInf f1) (ConjInf f2) = ConjInf (\x -> f1 x || f2 x)
+
+interseccionConjInf :: ConjInf a -> ConjInf a -> ConjInf a
+interseccionConjInf (ConjInf f1) (ConjInf f2) = ConjInf (\x -> f1 x && f2 x)
+
+-- 16i Definir el tipo de dato GNO (grafo no orientado) con sus constructores.
+type Nodo = Int
+type Arco = (Nodo, Nodo)
+
+data GNO= Grafo [Nodo] [Arco] deriving (Eq, Show)
+
+-- 16ii Definir la función esArbol, que dice si un grafo cumple con la condición de ser árbol. Asumir definida la función existeCamino, que dados dos nodos y un GNO, 
+-- devuelve si el segundo nodo es accesible desde el primero a través de un camino de arcos del GNO dado de longitud mayor o igual que uno.
+esArbol::GNO -> Bool
+esArbol (Grafo nodos aristas) = esConexo (Grafo nodos aristas) && length aristas == length nodos - 1
+
+esConexo :: GNO -> Bool
+esConexo (Grafo [] _) = True
+esConexo (Grafo [_] _) = True
+esConexo (Grafo nodos arcos) =
+  all (\(x, y) -> x == y || existeCamino x y (Grafo nodos arcos)) pares
+  where
+    pares = [(x, y) | x <- nodos, y <- nodos, x < y]
+
+-- esConexo =   all ( \nodo -> existeCamino nodo head(tail nodos) (Grafo nodos arcos)) nodos
+
+-- asumir que existe existeCamino::Nodo -> Nodo -> GNO -> Bool
+existeCamino :: Nodo -> Nodo -> GNO -> Bool
+existeCamino origen destino grafo@(Grafo nodos aristas)
+  | origen == destino = False  -- No queremos caminos de longitud 0
+  | otherwise = destino `elem` dfs origen []
+  where
+    dfs :: Nodo -> [Nodo] -> [Nodo]
+    dfs actual visitados
+      | actual `elem` visitados = []
+      | otherwise =
+          let vecinos = vecinosDe actual grafo
+              nuevos = filter (`notElem` visitados) vecinos
+          in actual : concatMap (\n -> dfs n (actual : visitados)) nuevos
+
+vecinosDe :: Nodo -> GNO -> [Nodo]
+vecinosDe n (Grafo _ aristas) =   [y | (x, y) <- aristas, x == n] ++   [x | (x, y) <- aristas, y == n]
