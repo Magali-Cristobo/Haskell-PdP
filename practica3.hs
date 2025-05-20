@@ -23,9 +23,9 @@ sacaParesOS = filterOS odd
 -- mapOS f [] = []
 -- mapOS f (x:xs) = f x : mapOS f xs
 
-map2::(a -> b) -> [[a]] -> [[b]]
-map2 f [ ] = []
-map2 f (xs:xss) = ((map f xs):(map2 f xss))  
+-- map2::(a -> b) -> [[a]] -> [[b]]
+-- map2 f [ ] = []
+-- map2 f (xs:xss) = ((map f xs):(map2 f xss))  
 -- con transiciones lambda 
 -- map2 f xss = map (\ xs-> map f xs) xss
 -- map2 f = map (\ xs-> map f xs) 
@@ -290,4 +290,33 @@ mapn (f , []) = []
 mapn (f , (x:xs)) = f x : mapn (f, xs)
 -- mapn (f, xs) = map f xs usando map
 
---13i 
+--13i Definir una función no currificada mapn2, que aplique una función a todos los elementos de todas las listas de una lista de listas.
+mapn2:: ((a -> b ), [[a]]) -> [[b]]
+mapn2 (f, []) = []
+mapn2 (f, xss) = map (\ xs -> map f xs) xss
+-- mapn2 (f, xss) = map (map f) xss
+
+--13 ii) Definir una función map2 como la función currificada de mapn2 usando map.
+map2::(a -> b) -> [[a]] -> [[b]]
+-- map2 f [] = []
+-- map2 f xss = map (\ xs -> map f xs) xss
+-- map2 f = map (\ xs-> map f xs) 
+map2 f = map (map f)
+
+--13 iii) Definir otra versión de map2 usando la función infija o.
+-- map2 = map <.> map 
+
+-- 14 Definir una función mapArb, una versión de map que en lugar de recibir una lista, recibe un elemento de tipo ArbBin (árbol binario).
+data ArbBin a = Hoja a | Nodo a (ArbBin a) (ArbBin a) deriving Show
+
+mapArb:: (a -> b) -> ArbBin a -> ArbBin b
+mapArb f (Hoja n) = Hoja(f n)
+mapArb f (Nodo n si sd) = Nodo (f n) (mapArb f si) (mapArb f sd)
+
+-- 15.	i) Definir una función mapo, una versión de map que toma una función de dos argumentos y una lista de pares de valores, y devuelve la lista de aplicaciones de la función a cada par.  ¿Qué se puede concluir?
+mapo::(a -> b -> c) -> [(a, b)] -> [c]
+mapo f [] = []
+mapo f (x:xs) = f (fst x) (snd x) : mapo f xs
+-- mapo f pares = map (\(x, y) -> f x y) pares
+
+-- que se puede concluir??
