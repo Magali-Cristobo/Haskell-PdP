@@ -451,3 +451,48 @@ existeCamino origen destino grafo@(Grafo nodos aristas)
 
 vecinosDe :: Nodo -> GNO -> [Nodo]
 vecinosDe n (Grafo _ aristas) =   [y | (x, y) <- aristas, x == n] ++   [x | (x, y) <- aristas, y == n]
+
+
+-- 21) i) Programar el tipo de dato Expresion que permite representar expresiones aritméticas enteras con operadores de suma, resta, multiplicación, división, negación unaria y elevación al cuadrado.
+
+data Expresion = Const Int | Suma Expresion Expresion | Resta Expresion Expresion | Mult Expresion Expresion  | Div Expresion Expresion | Neg Expresion | Pot Expresion deriving (Show, Eq)
+
+-- 21) ii Programar una función listaAExp que dada una lista de cadenas de caracteres que representa una expresión correctamente escrita en notación prefija, devuelva la expresión asociada de tipo expresion.
+
+listaAExp:: [String] -> Expresion
+listaAExp xs = fst (parseExp xs)
+  
+
+parseExp:: [String] -> (Expresion, [String])
+parseExp (x:xs) 
+  | x == "+" = let (e1, r1) = parseExp xs
+                   (e2, r2) = parseExp r1
+               in (Suma e1 e2, r2)
+  | x == "-" = let (e1, r1) = parseExp xs
+                   (e2, r2) = parseExp r1
+               in (Resta e1 e2, r2)
+  | x == "*" = let (e1, r1) = parseExp xs
+                   (e2, r2) = parseExp r1
+               in (Mult e1 e2, r2)
+  | x == "/" = let (e1, r1) = parseExp xs
+                   (e2, r2) = parseExp r1
+               in (Div e1 e2, r2)
+  | x == "neg" = let (e, r) = parseExp xs
+                 in (Neg e, r)
+  | x == "cuad" = let (e, r) = parseExp xs
+                  in (Pot e, r)
+  | all (`elem` "-0123456789") x = (Const (read x), xs)
+  | otherwise = error ("Símbolo no reconocido: " ++ x)
+
+
+-- 21)iii Programar además la función inversa de la anterior (expALista), que dada una expresión del tipo expresión, devuelve una lista con el formato antes visto.
+-- Nota:  Asumir que existe una función strAInt, que dado un número en formato de lista de char devuelve un Int, y su inversa intAStr. No programar estas funciones.
+
+expALista:: Expresion -> [String]
+expALista (Const n)        = [intAStr n]
+expALista (Suma e1 e2)     = ["+"] ++ expALista e1 ++ expALista e2
+expALista (Resta e1 e2)    = ["-"] ++ expALista e1 ++ expALista e2
+expALista (Mult e1 e2)     = ["*"] ++ expALista e1 ++ expALista e2
+expALista (Div e1 e2)      = ["/"] ++ expALista e1 ++ expALista e2
+expALista (Neg e)          = ["-u"] ++ expALista e
+expALista (Pot e)     = ["^"] ++ expALista e
