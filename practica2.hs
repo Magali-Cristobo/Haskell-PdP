@@ -452,6 +452,30 @@ existeCamino origen destino grafo@(Grafo nodos aristas)
 vecinosDe :: Nodo -> GNO -> [Nodo]
 vecinosDe n (Grafo _ aristas) =   [y | (x, y) <- aristas, x == n] ++   [x | (x, y) <- aristas, y == n]
 
+--  19) i) Describir el tipo GR (gramática regular con producciones lambda) con terminales de cualquier tipo.
+-- data Produccion a b = Lambda | NTT b b a | T a | TNT b a b
+-- data GR a b = Gram [a] [b] b [Produccion a b] deriving Show
+
+-- otra opcion
+
+type NoTerminal = Char
+
+data Produccion a
+  = Termina a NoTerminal    -- X → a Y
+  | Final a                 -- X → a
+  | Lambda                  -- X → λ
+  deriving (Eq, Show)
+
+type GR a = ([NoTerminal], [a], NoTerminal, [(NoTerminal, Produccion a)])
+
+--19) ii) Programar la función currificada esInfinito, que decida si el lenguaje generado por una gramática regular es infinito o no. Asumir que existe una 
+-- función esAlcanzable, que dado un no terminal y una gramática regular, diga si genera algún elemento a partir del no terminal dado de la gramática regular dada.
+esInfinito :: Eq a => GR a -> Bool
+esInfinito (nts, ts, s, prods) = any (\ n -> esAlcanzable n (nts, ts, s, prods)) prods
+ 
+
+esAlcanzable :: Eq a => NoTerminal -> GR a -> Bool
+
 
 -- 21) i) Programar el tipo de dato Expresion que permite representar expresiones aritméticas enteras con operadores de suma, resta, multiplicación, división, negación unaria y elevación al cuadrado.
 
@@ -489,7 +513,7 @@ parseExp (x:xs)
 -- Nota:  Asumir que existe una función strAInt, que dado un número en formato de lista de char devuelve un Int, y su inversa intAStr. No programar estas funciones.
 
 expALista:: Expresion -> [String]
-expALista (Const n)        = [intAStr n]
+-- expALista (Const n)        = [(read n)::Int]
 expALista (Suma e1 e2)     = ["+"] ++ expALista e1 ++ expALista e2
 expALista (Resta e1 e2)    = ["-"] ++ expALista e1 ++ expALista e2
 expALista (Mult e1 e2)     = ["*"] ++ expALista e1 ++ expALista e2

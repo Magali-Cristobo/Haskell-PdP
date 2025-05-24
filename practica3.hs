@@ -118,8 +118,8 @@ ultimo = head <.> reverse
 -- la restriccion es que la imagen de g debe estar incluida en el dominio de f
 
 -- 7i Definir la función curry, que dada una función de dos argumentos, devuelve su equivalente currificada.  ¿Qué limitaciones debe tener esta función?
--- curry:: ((a -> b )-> c) -> (a -> b -> c)
--- curry f x y = f(x,y)
+-- curry:: ((a, b )-> c) -> (a -> b -> c)
+-- curry f x y = f (x,y)
 -- limitaciones: solo convierte funciones que reciben un par como único argumento en funciones curificadas.
 
 -- 7ii Definir la función uncurry, que dada una función currificada de dos argumentos, devuelva su versión no currificada equivalente.
@@ -285,6 +285,7 @@ mapOS::(a -> b) -> [a] -> [b]
 mapOS f [] = []
 mapOS f (x:xs) = f x : mapOS f xs
 
+-- 12ii Definir la función mapn, como la versión no currificada de map.
 mapn:: ((a -> b), [a]) -> [b]
 mapn (f , []) = []
 mapn (f , (x:xs)) = f x : mapn (f, xs)
@@ -318,5 +319,30 @@ mapo::(a -> b -> c) -> [(a, b)] -> [c]
 mapo f [] = []
 mapo f (x:xs) = f (fst x) (snd x) : mapo f xs
 -- mapo f pares = map (\(x, y) -> f x y) pares
+-- mapo f xs = map (uncurry f) xs
 
--- que se puede concluir??
+-- se puede concluir en mapo f xs = map (uncurry f) xs
+-- uncurry devuelve ((a -> b) -> c)
+
+-- 15 ii) Definir una función mapo2, una versión de mapo que toma una función currificada de dos argumentos y dos listas (de igual longitud), y devuelve una 
+-- lista de aplicaciones de la función a cada elemento correspondiente a las dos listas. Esta función en Haskell se llama zipWith.
+mapo2:: (a -> b -> c) -> [a] -> [b] -> [c]
+mapo2 f [] ys = []
+mapo2 f (x:xs) [] = []
+mapo2 f (x:xs) (y:ys) = f x y: mapo2 f xs ys
+
+-- 15 iii) Modificar la función mapo2 anterior (si lo cree necesario) para que pueda ser usada por una función sumamat, que suma dos matrices y devuelve otra matriz. 
+-- Asumir que las dos matrices de entrada tienen la misma cantidad de filas y de columnas. Explicitar además a qué tipo es equivalente el tipo matriz.
+type Matriz a = [[a]]
+mapom:: (a -> b -> c) -> [a] -> [b] -> [c]
+mapom f [] ys = []
+mapom f (x:xs) [] = []
+mapom f (x:xs) (y:ys) = f x y: mapo2 f xs ys
+
+
+sumamat:: Num a=> Matriz a -> Matriz a -> Matriz a
+-- sumamat xss yss = mapo2(\ xs ys -> (mapo2 (\ x y -> x + y) xs ys)) xss yss
+sumamat = mapo2(mapo2 (+)) 
+
+-- 16 Si xs es una lista, la evaluación de map f (map g xs), xs requiere recorrer dos veces la lista xs. Simplificar la expresión de modo que sólo deba recorrérsela 
+-- una vez, definiendo una función simplif, que reciba las dos funciones y la lista.
