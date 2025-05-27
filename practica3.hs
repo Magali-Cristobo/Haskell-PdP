@@ -346,3 +346,109 @@ sumamat = mapo2(mapo2 (+))
 
 -- 16 Si xs es una lista, la evaluación de map f (map g xs), xs requiere recorrer dos veces la lista xs. Simplificar la expresión de modo que sólo deba recorrérsela 
 -- una vez, definiendo una función simplif, que reciba las dos funciones y la lista.
+
+simplif:: (b -> c) -> (a -> b) -> [a] -> [c]
+-- simplif _ _ [] = []
+simplif f g = map (f . g) 
+
+-- 17 Definir una función sigma que calcule la suma de una serie. Los parámetros son lower (límite inferior de la sumatoria), upper (límite superior) y 
+-- una función que indique el término general en la serie. Usar las funciones sumaLista, « y map.
+sigma:: (Int -> Int) -> Int -> Int -> Int
+sigma f lower upper = sumaLista (map f lista ) where lista =  (<->) lower (upper - lower)
+
+-- Definir una función pascal que devuelva en forma de listas el triángulo de Pascal (o de Tartaglia) hasta la altura pedida. No se permite el uso de números 
+-- combinatorios. Usar ultimo, paresConsec (función que dada una lista devuelve todos los pares de elementos junto a su sucesor) y map.
+-- Ejemplo de paresConsec: paresConsec [7,3,2,5] ® [(7,3),(3,2),(2,5)].
+-- Ej: pascal 4 ® [ [1], [1,1], [1,2,1], [1,3,3,1], [1,4,6,4,1] ]
+paresConsec:: [Int] -> [(Int, Int)]
+paresConsec [] = []
+paresConsec [_] = [] -- me habia olvidado de esto
+paresConsec (x:(xs: [])) = [(x, xs)]
+paresConsec (x:(xs: xss)) = [(x, xs)] ++ paresConsec (xs:xss)
+-- paresConsec xs = zip xs (tail xs)
+
+-- La función zip en Haskell toma dos listas y devuelve una lista de pares, donde el i-ésimo par contiene el i-ésimo elemento de cada lista. Si una lista es más corta, la función termina ahí
+-- zip :: [a] -> [b] -> [(a, b)] 
+-- zip (x:xs) (y:ys) = (x, y) : zip xs ys
+-- zip _ _ = []
+
+sumaPares::[(Int, Int)] -> [Int]
+sumaPares [] = []
+sumaPares (x:xs) = fst x + snd x : sumaPares xs
+
+pascal:: Int -> [[Int]]
+pascal 0 = [[1]]
+-- pascal n =  anteriores ++ [[1] ++ (sumaPares ( paresConsec (ultimo anteriores))) ++ [1]] where anteriores = pascal (n - 1)
+pascal n =  anteriores ++ [[1] ++ (map ( uncurry (+)) ( paresConsec (ultimo anteriores))) ++ [1]] where anteriores = pascal (n - 1)
+-- map reemplazaria el suma pares utilizando uncurry de la funcion suma aplicada a todos los anteriores
+
+-- otra forma
+-- pascal n = anteriores ++ [nuevos] 
+--     where 
+--         anteriores = pascal (n - 1) 
+--         ultima = ultimo anteriores
+--         nuevos = [1] ++ sumaPares (paresConsec ultima) ++ [1]
+
+-- con map
+-- pascal :: Int -> [[Int]]
+-- pascal 0 = [[1]]
+-- pascal n = let anteriores = pascal (n - 1)
+--                anterior = last anteriores
+--                nueva = 1 : map (uncurry (+)) (paresConsec anterior) ++ [1]
+--            in anteriores ++ [nueva]
+
+-- 19 i) Definir la función de orden superior mapearF, que dada una lista de funciones y una lista (donde ambas tienen la misma cantidad de elementos), devuelva otra lista con cada 
+-- resultado de la aplicación de cada función a su elemento correspondiente de la lista.
+mapearF:: [(a -> b)] -> [ a ] -> [ b ]
+mapearF _ [] = []
+mapearF [] _ = []
+mapearF (f:fs) (x:xs) = f x : (mapearF fs xs)
+ -- se llama zipWith ($) supuestamente
+
+-- 19 ii) Definir la función paresEnPosic, que dada una lista de enteros, devuelva si en cada posición i-ésima de la lista se encuentra el i-ésimo par natural positivo. Usar mapearF.
+paresEnPosic:: [Int] -> Bool
+paresEnPosic [] = False
+paresEnPosic xs = all (\ x -> x == True) (mapearF [(==x)| x <- [2..(2*long xs)], even x] xs)
+-- paresEnPosic xs = all id (mapearF [(==x) | x <- take (length xs) [2,4..]] xs)
+
+-- 20 Decir cuál es el tipo más general de f (si es posible calcularlo) cuya definición es:
+ -- i) f (x,y) = mapn (x,(x y))
+ -- mapn recibe una funcion de a -> b, que seria x en este caso y un arreglo [a]. Entonces x tiene que ser del tipo (a -> [b]), y sera del tipo a (por la definicion de la funcion)
+ -- entonces quedaria f :: ((a -> [b]), a) -> [b]
+
+ -- ii) f (x,y,z) = mapn (x,(x y):z)
+-- x:: a -> b
+-- (x y):z :: [b], deberia ser [a] segun mapn
+-- x y :: b
+-- y::a
+-- z:: [b]
+-- quedaria f :: ((a -> c), a, [a]) -> [c]
+
+-- es valido si mapn :: (a -> b, [a]) -> [b]
+
+ -- iii) f = map map
+-- map::(a -> b) -> [a] -> [b]
+-- f g xss = map (\ xs -> map g xs) xss
+-- g:: (a -> b)
+-- xs:: [a]
+-- xss:: [[a]]
+-- sabemos que devuelve [[b]]
+
+-- f:: (a -> b) -> [[a]] -> [[b]]
+-- puse eso pero chatgpt me lo corrigio a [a -> b] porque no estan general la otra opcion, podrian ser varias funciones aplicadas no una sola
+
+-- iv) f = curry `o` curry
+-- como hay 2 currys no puede ser ((a, b )-> c), va a tener que tener dos tuplas para que tenga sentido
+-- curry:: ((a, b ) -> c) -> (a -> b -> c)
+-- tiene que recibir los parametros de forma no currificada 
+-- curry f :: (a, b) -> c -> d
+-- curry curry f:: (((a,b), c)-> d )-> a -> b -> c -> d
+-- curry f x y = curry (curry f (x, y)) => \x -> \y -> curry (curry f (x, y)) => \x -> \y -> curry (a -> b -> c)
+-- esto quiere decir que si tenemos curry curry inicialmente teniamos una tupla con otra dentro ((a,b), c)
+-- entonces el segundo curry recibiria ((a, b) -> c) -> d y devolveria a -> b -> c -> d
+
+-- curry:: ((a, b )-> c) -> (a -> b -> c)
+-- curry f x y = f (x,y)
+-- curry f x = \ y  -> f (x, y)
+-- funcion que toma un x y devuelve una funcion del tipo y -> f (x,y)
+-- curry f = \x -> \y -> f (x,y)     f (x,y) = c
