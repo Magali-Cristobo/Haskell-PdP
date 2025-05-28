@@ -265,7 +265,8 @@ untilB c f n = if not(c n) then n else (untilB c f (f n))
 
 --11 iii definir ultimo usando while
 ultimoB:: [a] -> a -- tenemos que quedarnos con la cabeza y el resto si o si, usamos una tupla.
-ultimoB xs = snd (while (\ (xs, s) -> not (null (tail xs))) (\ (xs , s) -> (tail xs, head (tail xs))) (xs, head xs))
+-- ultimoB xs = snd (while (\ (xs, s) -> not (null (tail xs))) (\ (xs , s) -> (tail xs, head (tail xs))) (xs, head xs))
+ultimoB xs = head(while (\ ys -> not (null (tail ys))) tail xs)
 
 --11 iv Definir long, append, sumaLista y genLista usando while. Comparar estas funciones con las equivalentes realizadas en un lenguaje imperativo usando la estructura de control de iteración.
 longB:: [a] -> Int
@@ -408,7 +409,7 @@ mapearF (f:fs) (x:xs) = f x : (mapearF fs xs)
 -- 19 ii) Definir la función paresEnPosic, que dada una lista de enteros, devuelva si en cada posición i-ésima de la lista se encuentra el i-ésimo par natural positivo. Usar mapearF.
 paresEnPosic:: [Int] -> Bool
 paresEnPosic [] = False
-paresEnPosic xs = all (\ x -> x == True) (mapearF [(==x)| x <- [2..(2*long xs)], even x] xs)
+paresEnPosic xs = all (\ x -> x == True) (mapearF [(==x)| x <- [0..(2*long xs)], even x] xs)
 -- paresEnPosic xs = all id (mapearF [(==x) | x <- take (length xs) [2,4..]] xs)
 
 -- 20 Decir cuál es el tipo más general de f (si es posible calcularlo) cuya definición es:
@@ -452,3 +453,100 @@ paresEnPosic xs = all (\ x -> x == True) (mapearF [(==x)| x <- [2..(2*long xs)],
 -- curry f x = \ y  -> f (x, y)
 -- funcion que toma un x y devuelve una funcion del tipo y -> f (x,y)
 -- curry f = \x -> \y -> f (x,y)     f (x,y) = c
+
+
+-- 21 i) Explique a grandes rasgos las principales diferencias entre recursión de pila y de cola.
+-- En la recursión de pila, la llamada recursiva NO es lo último que ocurre en la función. Cada llamada queda pendiente de una operación, por lo que se acumulan frames en la pila de ejecución. Si la lista es muy larga, puede dar stack overflow.
+-- Ejemplo:
+-- sumarLista :: [Int] -> Int
+-- sumarLista [] = 0
+-- sumarLista (x:xs) = x + sumarLista xs
+
+-- En la recursión de cola, la llamada recursiva es la última operación que se hace en la función. Esto permite que el compilador pueda hacer una optimización de tail-call, y no acumula pila.
+-- Ejemplo:
+-- sumarListaTR :: [Int] -> Int
+-- sumarListaTR xs = sumarAux xs 0
+ 
+-- sumarAux [] acc = acc
+-- sumarAux (x:xs) acc = sumarAux xs (acc + x)
+
+-- Cada llamada a sumarAux solo pasa nuevos parámetros, sin operaciones pendientes.
+ -- ii) Enumere funciones anteriores que puedan definirse de una forma más sencilla con recursión de pila que de cola, y viceversa.
+
+
+ -- 22 Definir las funciones factorial, suma (todos los elementos de una lista), rev, append y aparear de manera que sean recursivas de cola.
+
+factorial:: Int -> Int
+factorial n = factAux n 1 
+  where 
+    factAux 0 acc = acc 
+    factAux n acc = factAux (n - 1) (n * acc)
+    -- es lo mismo que crear otra funcion nada mas que esta solo se puede usar dentro de factorial
+
+-- opcion con let
+-- factorial :: Int -> Int
+-- factorial n =
+--   let factAux 0 acc = acc
+--       factAux n acc = factAux (n - 1) (n * acc)
+--   in factAux n 1
+
+-- factorial n = let factAux ... in factAux n 1 internamente hace esto
+
+sumaListaB:: [Int] -> Int
+sumaListaB xs = sumAux xs 0 
+  where 
+    sumAux [] n = n
+    sumAux (x:xs) n = sumAux xs (n + x) 
+
+rev:: [a] -> [a]
+rev xs = revAux xs []
+  where
+    revAux [] ys = ys
+    revAux (x:xs) ys = revAux xs (x:ys)
+
+append :: [Int] -> [Int] -> [Int]
+append xs ys = appendAux xs ys xs
+  where
+    appendAux [] _ acum = acum
+    appendAux as (b:bs) acum = appendAux as bs (b:(acum))
+
+-- no se puede hacer append de cola sin modificar el orden
+-- append :: [a] -> [a] -> [a]
+-- append xs ys = appendAux (rev xs) ys
+--   where
+--     appendAux [] acc = acc
+--     appendAux (x:xs) acc = appendAux xs (x : acc)
+
+-- [1,2,3] [5,6,7]
+-- [3,2,1] [5,6,7]
+-- [2,1] [3,5,6,7]
+-- [1] [2,3,5,6,7]
+
+aparear :: [a] -> [b] -> [(a,b)]
+aparear xs ys = aparearAux xs ys []
+  where
+    aparearAux [] _ acc = reverse acc
+    aparearAux _ [] acc = reverse acc
+    aparearAux (x:xs) (y:ys) acc = aparearAux xs ys ((x,y) : acc)
+
+-- 23 Definir las funciones par (devuelve si un número es par o no) e impar usando recursión mutua (indirecta).
+-- ii) Definir las funciones cong0, cong1 y cong2 (devuelve si un número es congruente a cero, uno o dos respectivamente) usando recursión mutua.
+par:: Int -> Bool
+par 0 = True
+par n = impar (n - 1)
+
+impar:: Int -> Bool
+impar 0 = False
+impar n = par (n - 1)
+
+-- ii) Definir las funciones cong0, cong1 y cong2 (devuelve si un número es congruente a cero, uno o dos respectivamente) usando recursión mutua.
+-- no me acuerdo que era esto
+
+-- 24
+--  foldr :: (a -> b -> b) -> b -> [a] -> b
+--   foldr f b [] = b
+--   foldr f b (x:xs) = f x (foldr f b xs)
+
+--   foldl :: (b -> a -> b) -> b -> [a] -> b
+--   foldl f b [] = b
+--   foldl f b (x:xs) = foldl f (f b x) xs
