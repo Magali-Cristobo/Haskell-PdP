@@ -95,8 +95,8 @@ genLista f 0 x = []
 genLista f n x =  x : genLista f (n - 1) (f x)
 
 --4ii Definir « usando genLista.
-(<->):: Int -> Int -> [Int]
-x <-> n = genLista (+1) (2 * n + 1) (x - n)
+-- (<->):: Int -> Int -> [Int]
+-- x <-> n = genLista (+1) (2 * n + 1) (x - n)
 -- considere que <-> era una lista centrada en un x, de longitud n
 
 -- 5 Definir una función filter que depura una lista, dejando sólo aquellos elementos que cumplen con una condición dada. Esta condición está reflejada en una función booleana. Ej: filter even [1,2,3,4,5] ® [2,4]. En Haskell esta función no se aplica sobre listas, sino sobre elementos de un tipo perteneciente a la clase MonadZero, que incluye a las listas.
@@ -542,11 +542,62 @@ impar n = par (n - 1)
 -- ii) Definir las funciones cong0, cong1 y cong2 (devuelve si un número es congruente a cero, uno o dos respectivamente) usando recursión mutua.
 -- no me acuerdo que era esto
 
--- 24
---  foldr :: (a -> b -> b) -> b -> [a] -> b
---   foldr f b [] = b
---   foldr f b (x:xs) = f x (foldr f b xs)
+-- 24 falta hacer
+-- foldr :: (a -> b -> b) -> b -> [a] -> b
+-- foldr f b [] = b
+-- foldr f b (x:xs) = f x (foldr f b xs)
 
 --   foldl :: (b -> a -> b) -> b -> [a] -> b
 --   foldl f b [] = b
 --   foldl f b (x:xs) = foldl f (f b x) xs
+
+
+-- 25 
+sumaListaFR:: [Int] -> Int
+sumaListaFR = foldR (+) 0
+-- foldr (\x acc -> x + acc) 0
+
+idL :: [a] -> [a]
+idL = foldr (:) []
+
+memberFR::Int -> [Int] -> Bool
+memberFR x xs = foldR (\ n acc -> n == x || acc) False xs
+
+appendFR:: [a] -> [a] -> [a]
+appendFR xs ys = foldR (:) ys xs
+
+revFR:: [a] -> [a]
+revFR xs = foldR (\ x acc -> acc ++ [x]) [] xs
+
+filterFR:: (a -> Bool) -> [a] -> [a]
+filterFR f xs = foldR (\ x acc -> if (f x) then (x:acc) else acc) [] xs
+
+mapFR:: (a -> b) -> [a] -> [b]
+mapFR f xs = foldR (\x acc -> f x:acc) [] xs
+
+-- siempre hay acumulador!!!
+
+-- faltan norma2 (de un vector representado como lista de números), flat, insort (ordenamiento de una lista según el método de inserción), partes, compFuncs (composición de cero, una o más funciones)??
+
+
+-- 26i Definir la función esPrimo, que dado un número dice si es primo o no. Usar map, foldr y «. Considerar (si hace falta) que 1 es primo.
+-- member :: [Int] -> Int -> Bool
+-- member [] a = False
+-- member (x:xs) a = if x == a then True else (member xs a) 
+
+(<->):: Int -> Int -> [Int]
+x <-> n = if x /= n then x:((x+1) <-> n) else [x]
+
+-- (<->):: Int -> Int -> [Int]
+-- a <-> b = [a..b]
+
+esPrimo:: Int -> Bool
+esPrimo 1 = True
+esPrimo n = not (foldr (||) False (map (\ x -> mod n x == 0) ((<->) 2 (n - 1))))
+
+
+-- 26ii
+-- cantMell1000::Int
+
+cantMell:: Int
+cantMell = map (filter esPrimo (1 <->1000)))
