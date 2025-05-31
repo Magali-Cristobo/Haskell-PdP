@@ -557,8 +557,9 @@ sumaListaFR:: [Int] -> Int
 sumaListaFR = foldR (+) 0
 -- foldr (\x acc -> x + acc) 0
 
-idL :: [a] -> [a]
-idL = foldr (:) []
+idFR :: [a] -> [a]
+idFR = foldr (:) []
+-- idFR xs = foldR (\ x accum -> (x:accum) ) [] xs
 
 memberFR::Int -> [Int] -> Bool
 memberFR x xs = foldR (\ n acc -> n == x || acc) False xs
@@ -578,13 +579,38 @@ mapFR f xs = foldR (\x acc -> f x:acc) [] xs
 -- siempre hay acumulador!!!
 
 -- faltan norma2 (de un vector representado como lista de números), flat, insort (ordenamiento de una lista según el método de inserción), partes, compFuncs (composición de cero, una o más funciones)??
+-- ii los mismos pero con foldl
+sumaListaFL:: [Int] -> Int
+sumaListaFL = foldL (+) 0
+
+idFL :: [a] -> [a]
+idFL xs = rev (foldL (\ acc x -> (x:acc)) [] xs)
+-- idFL xs = foldL (flip (:)) [] xs
+-- idFL xs = foldl (++) [] (map (:[]) xs)
+
+memberFL::Int -> [Int] -> Bool
+memberFL x xs = foldL (\ acc n -> n == x || acc) False xs
+
+appendFL:: [a] -> [a] -> [a]
+appendFL xs ys = foldR (:) ys xs
+
+revFL::[a] -> [a]
+revFL xs = foldL (\ acc x -> (x:acc) ) [] xs
+
+filterFL:: (a -> Bool) -> [a] -> [a]
+filterFL f xs = foldL (\ acc x -> if (f x) then acc ++ [x] else acc) [] xs
+
+mapFL:: (a -> b) -> [a] -> [b]
+mapFL f xs = foldL (\ acc x -> f x:acc) [] xs
+
+--25iii Definir la función sumaAlt, que realiza la suma alternada de los elementos de una lista 
+--(da como resultado el primer elemento menos el segundo más el tercero menos el cuarto y así) usando foldr.  
+-- ¿Por qué no se puede hacer usando foldl?
+sumaAlt:: [Int] -> Int
+sumaAlt xs = foldR (\ n acc ->  - n - acc ) 0 xs
 
 
 -- 26i Definir la función esPrimo, que dado un número dice si es primo o no. Usar map, foldr y «. Considerar (si hace falta) que 1 es primo.
--- member :: [Int] -> Int -> Bool
--- member [] a = False
--- member (x:xs) a = if x == a then True else (member xs a) 
-
 (<->):: Int -> Int -> [Int]
 x <-> n = if x /= n then x:((x+1) <-> n) else [x]
 
@@ -596,8 +622,44 @@ esPrimo 1 = True
 esPrimo n = not (foldr (||) False (map (\ x -> mod n x == 0) ((<->) 2 (n - 1))))
 
 
--- 26ii
+-- 26ii Calcular la cantidad de primos mellizos menores a 1000 con el reductor cantMell. Dos números se dicen primos mellizos si ambos 
+-- son primos y su diferencia es 2. Usar , map, esPrimo y foldr.
 -- cantMell1000::Int
 
 cantMell:: Int
-cantMell = map (filter esPrimo (1 <->1000)))
+cantMell = foldR (\ x acc -> if (esPrimo (x + 2)) then acc + 1 else acc ) 0 (filter esPrimo (1 <-> 1000))
+
+-- con map sin filter
+-- cantMell = foldR (\ x acc -> if (esPrimo (x + 2)) then acc + 1 else acc ) 0 (filter (\ y -> y /= 0) (map (\x -> if esPrimo x then x else 0) (1 <-> 1000)))
+
+-- 27 Dada la siguiente función (variante de foldr):
+
+foldrb :: (c -> b -> b) -> (a -> c) -> b -> [a] -> b
+foldrb f g b [] = b
+foldrb f g b (x:xs) = f (g x) (foldrb f g b xs)
+
+-- Usarla para definir sumaLista, long y map
+sumaListaFRb:: [Int] -> Int
+sumaListaFRb xs = foldrb (+) id 0 xs
+
+longFRB:: [ a ] -> Int
+longFRB xs = foldrb (\ x acc -> acc + 1 ) id 0 xs
+
+mapFRb:: (a -> b ) -> [a] -> [b]
+mapFRb f xs = foldrb (:) f [] xs
+
+-- 28.	i)	Definir una variante de foldr para usarla en la definición de la función maxl.
+foldrMaxl::(a -> a -> a) -> [a] -> a
+foldrMaxl f (x:[]) = x
+foldrMaxl f (x:xs) = f x (foldrMaxl f xs)
+
+maxl :: Ord a => [a] -> a --suponemos que es una lista de enteros
+maxl = foldrMaxl max
+
+-- la funcion que le vamos a pasar a foldrMaxl es max, va a terminar buscando el max entre todos los elementos de la lista, cuando desapila
+-- foldr1' max [3,5,1]
+-- → max 3 (foldr1' max [5,1])
+-- → max 3 (max 5 (foldr1' max [1]))
+-- → max 3 (max 5 1)
+-- → max 3 5
+-- → 5
