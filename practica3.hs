@@ -663,3 +663,33 @@ maxl = foldrMaxl max
 -- → max 3 (max 5 1)
 -- → max 3 5
 -- → 5
+
+-- ii) Definir una variante de foldr para usarla sobre el tipo ArbBin (árboles binarios rotulados), y otra versión sobre el tipo ArbBinRotHoj (
+-- árboles binarios con rótulos sólo en las hojas).
+data ArbBinB a b = HojaB a | NodoB a (ArbBinB a b) (ArbBinB a b) deriving Show
+
+foldRArb :: (a -> b) -> (a -> b -> b -> b) -> ArbBinB a b -> b -- la primera es una funcion para procesar las hojas.
+foldRArb h n (HojaB x) = h x
+foldRArb h n (NodoB x i d) = n x (foldRArb h n i) (foldRArb h n d)
+
+data ArbBinRotHoj a = HojaRot a | NodoRot (ArbBinRotHoj a ) (ArbBinRotHoj a ) deriving Show
+
+foldRArbRot :: (a -> b) -> (b -> b -> b) -> ArbBinRotHoj a -> b -- la primera es una funcion para procesar las hojas.
+foldRArbRot h n (HojaRot x) = h x
+foldRArbRot h n (NodoRot i d) = n (foldRArbRot h n i) (foldRArbRot h n d)
+
+-- iii) Definir una variante de foldr para usarla en la definición de la función duplicados, que tome una lista y devuelva otra con los elementos que aparecían 
+-- más de una vez en la lista original. Ej: duplicados [1,2,3,2,1] ® [1,2].
+member :: Eq a => [a] -> a -> Bool
+member [] a = False
+member (x:xs) a = if x == a then True else (member xs a) 
+
+foldrVariante:: (a -> [a] -> [a]) -> [a] -> [a]
+foldrVariante _ [] = []
+foldrVariante f (x:xs) = f x (foldrVariante f xs)
+
+duplicados:: Eq a => [a] -> [a]
+duplicados xs = foldrVariante (\ x acc -> if ((member acc x)) then acc else if member xs x then (x:acc) else acc) xs
+
+-- 29 i) Programar una función cant currificada usando foldr por un lado y foldl por otro, que dada una función que refleja una condición y una lista, devuelva la 
+--cantidad de elementos que cumplen la condición. ¿Por qué‚ las dos versiones (usando foldr y foldl) son tan similares?
