@@ -50,8 +50,7 @@ dominio de map foldr: [x -> y -> y]
 entonces sustituimos x por  [a], y por Int, a por int (esto si o si porque x -> y -> y), entonces en realidad x = [Int]
 
 la imagen de map foldr es: [y -> [x] -> y]
-entonces sustituimos y por Int, x por [Int] (quedando [[Int]]).
-
+entonces sustituimos y por Int, x por [Int] (quedando [[Int]]). 
 quedaria entonces
 map foldr [(!!)]:: [Int -> [[Int]] -> Int]
 -}

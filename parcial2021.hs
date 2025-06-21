@@ -55,3 +55,28 @@ type ListaNoVacia a = ListaConBase a a
 foldrLNV :: (a -> b -> b) -> (a -> b) -> ListaNoVacia a -> b
 foldrLNV f g = foldListaConBase f (\ e -> case e of Right x -> g x)
 
+-- 4) Expresar y justificar el tipo de datos más general inferido de la siguiente expresión:
+	-- foldr map []
+{-
+definicion de foldr
+foldr:: (a -> b -> b) -> b -> [a] -> [b]
+map:: (a -> b) -> [a] -> [b]
+[]:: [a]
+tenemos que unificar el dominio de foldr (x -> y -> y) con el tipo de map, retornando la imagen de foldr (y -> [x] -> [y]) 
+sustituciones:
+x/ (a -> b)
+y/ [a]
+y/ [b]
+entonces y:: [a]
+foldr map:: [a] -> [(a -> b)] -> [[a]]
+dominio de foldr map :: [x] -> [(x -> y)] -> [[x]]
+hay que unificar el dominio [x] -> [(x -> y)] con el tipo [a]
+sustitucion:
+x/a
+resultado final:
+foldr map [] :: [(a -> b)] -> [b]
+
+ejemplo de aplicacion:
+foldr (\f acc -> map f [10,20] ++ acc) [] [(+1), (*2)]
+
+-}
