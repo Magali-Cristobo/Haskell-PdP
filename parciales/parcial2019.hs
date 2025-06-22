@@ -24,6 +24,13 @@ tieneDivisor n d
 divisores:: Int -> [Int]
 divisores n = [ x | x <- [2..n-1], mod n x == 0] 
 
+-- 2)		Dada las siguientes definiciones...
+
+		x ** y = if (x == 0 || y == 0) then 0 else x * y
+		lista = (0 : (map (+1) lista))
+
+		-- ...evaluar la expresión foldr ((**) . (\y -> y-1)) 35 lista utilizando modo de evaluación eager por un lado y normal order por otro, explicando con mayor detalle el modo de evaluación normal order.
+
 
 
 -- 3)i)	Definir utilizando type el tipo de datos Matriz de elementos de un tipo determinado, a partir del tipo lista.
@@ -56,5 +63,5 @@ calcular mat f g h = h filas cols
 
 
 -- iv)	Definir la función esSimetrica, que dada una matriz cuadrada, retorne si es simétrica. Utilizar la función calcular.
-esSimetrica::Matriz a -> Bool
--- esSimetrica mat = calcular mat (\ ) (\) (\ x y -> x == y )
+esSimetrica::Eq a => Matriz a -> Bool
+esSimetrica mat = calcular mat id id (\ x y -> x == y )
