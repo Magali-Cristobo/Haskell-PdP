@@ -35,7 +35,7 @@ foldrLNV f x ls = foldrListaConBase f (\u -> f u x) ls -- la u representa la seg
 {-
 map:: (a -> b) -> [a] -> [b]
 foldr:: (a -> b -> b) -> b -> [a] -> b
-(!!):: [a] -> [Int] -> a
+(!!):: [a] -> Int -> a
 [(!!)]::[[a] -> Int -> a ]
 
 (map foldr):: unificar tipo de dominio de map con el tipo de foldr, retornando el tipo de imagen de map

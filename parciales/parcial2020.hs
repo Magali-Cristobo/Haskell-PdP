@@ -5,10 +5,10 @@
 -- 		Definirla utilizando recursión explícita de pila.
 -- 	ii)	Idem anterior, pero utilizando mónadas.
 pares:: Int -> [(Int, Int)]
-pares n = paresb n 1 (n -1)
+pares n = paresb 1 (n -1)
 
-paresb:: Int -> Int -> Int -> [(Int, Int)]
-paresb n x y = if (x < y) && ((x + y) == n) then ((x, y):paresb n (x + 1) (y - 1)) else if (x < y) then (paresb n (x + 1) (y - 1) ) else []
+paresb:: Int -> Int -> [(Int, Int)]
+paresb x y = if (x < y) then ((x, y):paresb (x + 1) (y - 1)) else []
 
 paresbb :: Int -> [(Int, Int)]
 paresbb n = generar 1
@@ -16,6 +16,15 @@ paresbb n = generar 1
     generar a
       | a > n `div` 2 = []
       | otherwise     = (a, n - a) : generar (a + 1)
+
+-- pares :: Int -> [(Int, Int)]
+-- pares 0 = [(0,0)]
+-- pares n = paresAux 1 (n-1)
+
+-- paresAux :: Int -> Int -> [(Int, Int)]
+-- paresAux x y
+--    | x < y = (x,y):(paresAux (x+1) (y-1))
+--    | otherwise = []
 
 {-
 pares 2 (1,1)
@@ -30,6 +39,11 @@ pares n = [(1, n-1),  (2, n-2), (3, n-3)...]
 -- ii) usando monadas
 paresc:: Int -> [(Int, Int)]
 paresc n = [(a, b) | a <- [1..n], b <- [a..n], a + b == n]
+-- con monadas
+-- paresc n = do 
+--   a <- [1..n] 
+--   b <- [a..n]
+--   if (a + b) == n then return (a, b) else []
 
 -- 3)i)	Definir el tipo de datos ArbolNRot, que representa un árbol n-ario donde los nodos poseen un valor de un tipo dado, y donde los arcos (rótulos)
 --  que unen un nodo con cada subárbol también poseen un valor de eventualmente otro tipo dado. Considerar que el tipo puede ser paramétrico.
