@@ -6,6 +6,11 @@ signo :: Int -> Int
 signo 0 = 0
 signo n = if n > 0 then 1 else -1
 
+-- signo n
+--   | n > 0     = 1
+--   | n < 0     = -1
+--   | otherwise = 0
+
 -- 1ii dado un entero devuelve si es negativo o no. Usar signo.
 negativo :: Int -> Bool
 negativo n = signo n == -1
@@ -14,6 +19,10 @@ negativo n = signo n == -1
 maxi :: Int -> Int -> Int
 maxi a b = if a >= b then a else b
 
+-- maxi a b
+--   | a >= b    = a
+--   | otherwise = b
+
 -- 2ii que dados tres números devuelve el máximo de los tres. Usar max.
 max3 :: Int -> Int -> Int -> Int
 max3 a b c = maxi (maxi a b) c
@@ -21,6 +30,10 @@ max3 a b c = maxi (maxi a b) c
 -- 2iii dados dos números devuelve el mínimo de los dos. En Haskell esta función está predefinida para los tipos ordenados y se llama también min. Usar max.
 mini :: Int -> Int -> Int
 mini a b = if maxi a b == a then b else a
+
+-- mini a b
+--   | maxi a b == a = b
+--   | otherwise     = a
 
 -- 3i factorial
 fac :: Int -> Int
@@ -68,14 +81,14 @@ sumaLista (a:xs) = a + sumaLista (xs)
 -- 5iii
 member :: [Int] -> Int -> Bool
 member [] a = False
-member (x:xs) a = if x == a then True else (member xs a) 
+member (x:xs) a = x == a || member xs a 
 
 -- 5iv
 append :: [Int] -> [Int] -> [Int]
 append [] [] = []
 append (a:as) [] = (a:as)
 append [] (b:bs) = (b:bs)
-append (a:as) (b:bs) = [b] ++ append (a:as) bs
+append (a:as) (b:bs) = [a] ++ (append as (b:bs))
 
 tomar :: [a] -> Int -> [a]
 tomar [] n = []
@@ -84,7 +97,7 @@ tomar (a:as) n = [a] ++ tomar as (n-1)
 
 term :: [a] -> Int -> a
 -- term [] n = "error"
-term (a:as) 1 = a -- pongo 1 porque considero que esa es la primera posicion, sino seria 0
+term (a:as) 0 = a -- pongo 1 porque considero que esa es la primera posicion, sino seria 0
 term (a:as) n = term as (n-1)
 
 rev :: [a] -> [a]
@@ -95,11 +108,16 @@ maxl :: [Int] -> Int --suponemos que es una lista de enteros
 maxl (a:[]) = a
 maxl (a:as) = if a> maxl as then a else maxl as
 
+-- maxl' :: [Int] -> Int -- alternativa con foldl
+-- maxl' [] = error "Lista vacia"
+-- maxl' (a:as) = foldl maxi a as
+
+
 cuenta :: [Int] -> Int -> Int -- tuve que poner int, porque para a deberia estar definida la operacion ==
 cuenta [] n = 0
 cuenta (a:as) n = if a == n then cuenta as n + 1 else cuenta as n
 
-repite :: Int -> Int -> [Int]
+repite :: Int -> a -> [a] -- se llama replicate
 repite 0 x = []
 repite n x = [x] ++ repite (n-1) x
 
@@ -136,7 +154,7 @@ sacarUltimoI (a:as) = [a] ++ rev(resto(rev as))
 
 
 -- 8
-capicua :: [Int] -> Bool -- lo hice con int, no puedo poner a porque no funcionaria para todos los tipos
+capicua :: Eq a => [a] -> Bool -- lo hice con int, no puedo poner a porque no funcionaria para todos los tipos
 capicua (a:[]) = True
 capicua [] = True
 capicua (a:as) = if (a == (last as)) then (capicua (sacarUltimo(as))) else False

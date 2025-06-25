@@ -86,6 +86,7 @@ supf f g =  \x -> max (f x) (g x)
 -- 3ii Definir inff (ídem anterior, pero devolviendo el mínimo) usando supf
 inff::  (Num b, Ord b) => (a -> b) -> (a -> b) -> (a -> b)
 inff f g = \x -> negate (supf (\y -> negate (f y)) (\y -> negate (g y)) x)
+-- inff f g = (\x -> negate (supf (negate . f) (negate . g) x))
 
 -- 4i Definir una función genLista que genere una lista de una cantidad dada de elementos a partir de un elemento inicial dado y de una función dada que represente 
 -- la función de “incremento” entre los elementos de la lista (que dado un elemento que pertenezca a la lista devuelva el elemento siguiente en la misma lista, 
@@ -279,7 +280,7 @@ sumaLista:: [Int] -> Int
 sumaLista xs = snd (while (\ (xs, _) ->  not (null xs)) (\ (xs, c) -> (tail xs, c + head xs)) (xs, 0))
 
 genListaB:: (a -> a) -> Int -> a -> [a]
-genListaB f n d = fst (while (\ (x, l) -> 0 < l ) (\ (x, l) -> (x ++ [f (last x)], l-1)) ([d], n))
+genListaB f n d = fst (while (\ (x, l) -> 0 < l ) (\ (x, l) -> (x ++ [f (last x)], l-1)) ([d], n-1))
 
 -- 12i Definir una función currificada map, que dada una función y una lista como argumentos, devuelve otra lista que es el resultado de aplicar la función original (elemento a elemento) a cada uno de los elementos de la lista original.
 mapOS::(a -> b) -> [a] -> [b]
@@ -576,9 +577,30 @@ filterFR f xs = foldR (\ x acc -> if (f x) then (x:acc) else acc) [] xs
 mapFR:: (a -> b) -> [a] -> [b]
 mapFR f xs = foldR (\x acc -> f x:acc) [] xs
 
+-- Norma 2 de un vector (raíz cuadrada de suma de cuadrados)
+norma2 :: Floating a => [a] -> a
+norma2 = sqrt . foldr (\x acc -> x^2 + acc) 0
+
+-- Aplanar una lista de listas
+flat :: [[a]] -> [a]
+flat = foldr (++) []
+
+-- Inserta un elemento ordenadamente en una lista ordenada
+insertar :: Ord a => a -> [a] -> [a]
+insertar x = foldr (\y acc -> if x <= y then x : y : acc else y : acc) [x]
+
+-- Ordenamiento por inserción
+insort :: Ord a => [a] -> [a]
+insort = foldr insertar []
+
+-- Partes (potencia del conjunto)
+partes :: [a] -> [[a]]
+partes = foldr (\x acc -> acc ++ map (x:) acc) [[]]
+
+compFuncs :: [a -> a] -> (a -> a)
+compFuncs = foldr (.) id
 -- siempre hay acumulador!!!
 
--- faltan norma2 (de un vector representado como lista de números), flat, insort (ordenamiento de una lista según el método de inserción), partes, compFuncs (composición de cero, una o más funciones)??
 -- ii los mismos pero con foldl
 sumaListaFL:: [Int] -> Int
 sumaListaFL = foldL (+) 0
@@ -596,12 +618,19 @@ appendFL xs ys = foldR (:) ys xs
 
 revFL::[a] -> [a]
 revFL xs = foldL (\ acc x -> (x:acc) ) [] xs
+-- revL = foldl (flip (:)) []
 
+--  partes (conjunto potencia): Necesita aplicar map (x:) acc, y ese acc se usa tanto directa como internamente en map. foldl no es adecuado aquí porque la acumulación izquierda no permite reutilizar acc en el mismo paso.
+
+-- map y filter pueden definirse con foldl, pero no son eficientes (porque usan ++ o reverse)
 filterFL:: (a -> Bool) -> [a] -> [a]
 filterFL f xs = foldL (\ acc x -> if (f x) then acc ++ [x] else acc) [] xs
 
 mapFL:: (a -> b) -> [a] -> [b]
 mapFL f xs = foldL (\ acc x -> f x:acc) [] xs
+
+-- mapL f = reverse . foldl (\acc x -> f x : acc) []
+-- filterL p = reverse . foldl (\acc x -> if p x then x : acc else acc) []
 
 --25iii Definir la función sumaAlt, que realiza la suma alternada de los elementos de una lista 
 --(da como resultado el primer elemento menos el segundo más el tercero menos el cuarto y así) usando foldr.  
@@ -631,6 +660,20 @@ cantMell = foldR (\ x acc -> if (esPrimo (x + 2)) then acc + 1 else acc ) 0 (fil
 
 -- con map sin filter
 -- cantMell = foldR (\ x acc -> if (esPrimo (x + 2)) then acc + 1 else acc ) 0 (filter (\ y -> y /= 0) (map (\x -> if esPrimo x then x else 0) (1 <-> 1000)))
+-- otra opcion
+-- esPrimo :: Int -> Bool
+-- esPrimo n
+--   | n <= 1    = False
+--   | otherwise = not (tieneDivisorDesde 2)
+--   where
+--     tieneDivisorDesde i
+--       | i * i > n      = False
+--       | mod n i == 0   = True
+--       | otherwise      = tieneDivisorDesde (i + 1)
+
+-- cantMell :: Int
+-- cantMell = foldr (+) 0 (map (\(x, y) -> if esPrimo x && esPrimo y then 1 else 0) [(x, x+2) | x <- [1..997]])
+
 
 -- 27 Dada la siguiente función (variante de foldr):
 
@@ -680,16 +723,29 @@ foldRArbRot h n (NodoRot i d) = n (foldRArbRot h n i) (foldRArbRot h n d)
 
 -- iii) Definir una variante de foldr para usarla en la definición de la función duplicados, que tome una lista y devuelva otra con los elementos que aparecían 
 -- más de una vez en la lista original. Ej: duplicados [1,2,3,2,1] ® [1,2].
+
+foldrDuplicados :: Eq a => a -> ([a], [a]) -> ([a], [a])
+foldrDuplicados x (dup, acc) 
+  | x `elem` acc && not (x `elem` dup) = (x : dup, acc)
+  | otherwise = (dup, x : acc)
+
+duplicados :: Eq a => [a] -> [a]
+duplicados xs = reverse $ fst $ foldr foldrDuplicados ([], []) xs
+
 member :: Eq a => [a] -> a -> Bool
 member [] a = False
 member (x:xs) a = if x == a then True else (member xs a) 
 
-foldrVariante:: (a -> [a] -> [a]) -> [a] -> [a]
-foldrVariante _ [] = []
-foldrVariante f (x:xs) = f x (foldrVariante f xs)
+-- foldrVariante:: (a -> [a] -> [a]) -> [a] -> [a]
+-- foldrVariante _ [] = []
+-- foldrVariante f (x:xs) = f x (foldrVariante f xs)
 
-duplicados:: Eq a => [a] -> [a]
-duplicados xs = foldrVariante (\ x acc -> if ((member acc x)) then acc else if member xs x then (x:acc) else acc) xs
+foldrWithState :: (a -> (b, c) -> (b, c)) -> (b, c) -> [a] -> (b, c)
+foldrWithState _ acc []     = acc
+foldrWithState f acc (x:xs) = f x (foldrWithState f acc xs)
+
+-- duplicados:: Eq a => [a] -> [a]
+-- duplicados xs = foldrVariante (\ x acc -> if ((member acc x)) then acc else if member xs x then (x:acc) else acc) xs -- esto no anda
 
 -- 29 i) Programar una función cant currificada usando foldr por un lado y foldl por otro, que dada una función que refleja una condición y una lista, devuelva la 
 --cantidad de elementos que cumplen la condición. ¿Por qué‚ las dos versiones (usando foldr y foldl) son tan similares?

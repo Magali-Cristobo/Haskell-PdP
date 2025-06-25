@@ -33,9 +33,6 @@ partesFold xs = foldr (\ x acc -> acc ++ map (x:) acc ) [[]] xs
 		-- q :: (a -> a) -> a
 		-- q x = x (q x)
 
-		-- ...evaluar la siguiente expresión utilizando modo de evaluación normal order, y explicar las diferencias más significativas con el modo de evaluación eager:
-	-- head (q (\f xs -> if (null xs) then id else ((head xs):) . (f (tail xs)))
-	    --  [6,7,1] [3,3])
 -- 3)	i)	Dada una lista de listas de números que asemejan la forma de una matriz cuadrada (lista de filas donde cada fila corresponde a los 
 -- contenidos de sus columnas, y donde todas las filas poseen la misma cantidad de elementos), se solicita realizar una función que obtenga la 
 --  (triangular superior tomando como base a la diagonal secundaria). Utilizar foldr y/o map.

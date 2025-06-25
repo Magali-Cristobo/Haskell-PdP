@@ -72,6 +72,11 @@ insert :: Ord a => a -> ListaOrd a -> ListaOrd a
 insert x (LO xs) = LO (insert' x xs) where insert' x [] = [x]
                                            insert' x (y:ys) = if x<=y then (x:(y:ys)) else (y:insert' x ys)
 
+convertir:: ListaOrd a -> [a]
+convertir (LO []) = []
+-- convertir (LO (a:as)) = a:(convertir (LO as))
+convertir (LO xs) = xs
+
 {- 7
 si definimos un tipo con participacion de otro, estamos limitando el uso justamente para ese tipo, si lo hacemos sin ningun tipo existente, tenemos mas posibilidades
 de que se aplique a cualquier tipo existente, pero es probable que se requiera que ese tipo sea de algunas clases como show, eq, ord, etc
@@ -98,6 +103,7 @@ agregarP (PL xs) x =  PL (x:xs)
 sacarP:: Pila a -> Pila a
 sacarP (PL []) = PL []
 sacarP (PL (a:as)) = PL as
+-- sacarP (PL xs) = PL (tail xs)
 
 cantidadP :: Pila a -> Int
 cantidadP (PL []) = 0 
@@ -469,12 +475,12 @@ data Produccion a
 type GR a = ([NoTerminal], [a], NoTerminal, [(NoTerminal, Produccion a)])
 
 --19) ii) Programar la función currificada esInfinito, que decida si el lenguaje generado por una gramática regular es infinito o no. Asumir que existe una 
--- función esAlcanzable, que dado un no terminal y una gramática regular, diga si genera algún elemento a partir del no terminal dado de la gramática regular dada.
-esInfinito :: Eq a => GR a -> Bool
-esInfinito (nts, ts, s, prods) = any (\ n -> esAlcanzable n (nts, ts, s, prods)) prods
+-- -- función esAlcanzable, que dado un no terminal y una gramática regular, diga si genera algún elemento a partir del no terminal dado de la gramática regular dada.
+-- esInfinito :: Eq a => GR a -> Bool
+-- esInfinito (nts, ts, s, prods) = any (\ n -> esAlcanzable n (nts, ts, s, prods)) prods
  
 
-esAlcanzable :: Eq a => NoTerminal -> GR a -> Bool
+-- esAlcanzable :: Eq a => NoTerminal -> GR a -> Bool
 
 
 -- 21) i) Programar el tipo de dato Expresion que permite representar expresiones aritméticas enteras con operadores de suma, resta, multiplicación, división, negación unaria y elevación al cuadrado.

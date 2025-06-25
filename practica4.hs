@@ -20,3 +20,23 @@ esPerfecto:: Int -> Bool
 -- esPerfecto n = sumaLista ((filter (\ x -> (mod n x == 0)) ((<->) 1 (n - 1)))) == n
 esPerfecto n = sum (filter (\x -> n `mod` x == 0) [1..(n `div` 2)]) == n -- para agilizar
 
+-- pegar :: [[a]] -> [a]
+-- pegar = flat
+flat :: [[a]] -> [a]
+flat [[]] = []
+flat ((a:as):[[]]) = (a:as)
+flat ([]:(b:bs)) = flat (b:bs)
+flat (a:as) = [head(a)] ++ (flat((tail a):as))
+
+intercalar :: [a] -> [a] -> [a]
+intercalar [][] = []
+intercalar [](a:as) = (a:as)
+intercalar (a:as)[] = (a:as)
+intercalar (a:as) (b:bs) = [a] ++ [b] ++ (intercalar as bs)
+
+listaPares :: ([a], [b]) -> [(a,b)]
+-- listaPares (xs,ys) = flat (map (\i -> (map (\j -> (i, j)) ys)) xs) -- eso seria el producto cartesiano
+listaPares (xs, ys ) = zip xs ys
+-- listaPares (xs, ys) = intercalar pares []
+--   where
+--     pares = zip xs ys
