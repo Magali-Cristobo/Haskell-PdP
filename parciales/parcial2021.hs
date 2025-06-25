@@ -23,6 +23,18 @@ triangularInferior matriz = concat (zipWith take [1..] matriz)
 --   where
 --     f fila (n, acc) = (n - 1, take n fila ++ acc)
 
+-- inferioresMayoresLPC :: [[Int]] -> Int -> [Int]
+-- inferioresMayoresLPC xs n = [ x | x <- concat (triangularInferior xs), x > n]
+
+-- triangularInferior :: [[Int]] -> [[Int]]
+-- triangularInferior [] = []
+-- triangularInferior xs = triangInferiorAux xs 1 (length (head xs))
+
+-- triangInferiorAux :: [[Int]] -> Int -> Int -> [[Int]]
+-- triangInferiorAux xs n long
+--     | n > long = []
+--     | otherwise = (drop n (head xs)):(triangInferiorAux (tail xs) (n + 1) long)
+
 -- ii) Idem anterior, pero utilizando listas por comprensión (sin usar recursión explícita y evitando funciones de orden superior innecesarias).
 
 inferioresMayoresLC :: [[Int]] -> Int -> [Int]
@@ -59,22 +71,22 @@ foldrLNV f g = foldListaConBase f (\ e -> case e of Right x -> g x)
 	-- foldr map []
 {-
 definicion de foldr
-foldr:: (a -> b -> b) -> b -> [a] -> [b]
+foldr:: (a -> b -> b) -> b -> [a] -> b
 map:: (a -> b) -> [a] -> [b]
 []:: [a]
-tenemos que unificar el dominio de foldr (x -> y -> y) con el tipo de map, retornando la imagen de foldr (y -> [x] -> [y]) 
+tenemos que unificar el dominio de foldr (x -> y -> y) con el tipo de map, retornando la imagen de foldr (y -> [x] -> y) 
 sustituciones:
 x/ (a -> b)
 y/ [a]
 y/ [b]
 entonces y:: [a]
-foldr map:: [a] -> [(a -> b)] -> [[a]]
-dominio de foldr map :: [x] -> [(x -> y)] -> [[x]]
+foldr map:: [a] -> [(a -> a)] -> [[a]]
+dominio de foldr map :: [x] -> [(x -> y)] -> [x]
 hay que unificar el dominio [x] -> [(x -> y)] con el tipo [a]
 sustitucion:
 x/a
 resultado final:
-foldr map [] :: [(a -> b)] -> [b]
+foldr map [] :: [(a -> a)] -> [a]
 
 ejemplo de aplicacion:
 foldr (\f acc -> map f [10,20] ++ acc) [] [(+1), (*2)]

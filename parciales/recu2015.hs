@@ -20,7 +20,26 @@ triangInfB mss = zipWith take [1..length mss] mss
 unshuffle:: [a] -> Int -> (Int -> a -> Int -> Int) -> [[a]]
 unshuffle [] _ _ = []
 unshuffle _ 0 _ = []
-unshuffle xs n f =  direccionar f length xs 0 (map) -- la idea es generar tantas listas como numeros???
+unshuffle xs n f =  snd (foldr (\ x (i, acc) -> (i + 1, direccionar (length xs) x i f acc)) (0, replicate n []) xs )
 
-direccionar::Int -> a -> Int -> Int -> (Int -> a -> Int -> Int) -> [[a]] -> [[a]] -- longitud de la lista, elemento actual, posicion, cant restantes
-direccionar l actual pos rest f xss = (xss !! f l actual pos) ++ actual
+direccionar::Int -> a -> Int -> (Int -> a -> Int -> Int) -> [[a]] -> [[a]] -- longitud de la lista, elemento actual, posicion, funcion, listas
+-- direccionar l actual pos f xss =  (xss !! (f l actual pos)) ++ [actual] -- esto esta mal porque no podemos devolver solo la lista que modificamos, hay que devolver todas
+direccionar l actual pos f xss =
+  let idx = f l actual pos
+  in zipWith (\i xs -> if i == idx then xs ++ [actual] else xs) [0..] xss
+
+  	-- ii)	Definir la función unshuffle usando while.
+	-- iii)	Definir la función repartir, que dada una lista y una cantidad de listas para repartir, retorne una lista de listas donde se contengan todos los elementos repartidos equitativamente (el primer elemento va a la primera lista, el segundo va a la segunda, y cuando se terminan las listas, el siguiente elemento se reparte otra vez a la primera, el siguiente a la segunda, y así). Usar unshuffle.
+
+-- 3)	Expresar el tipo de datos más general (justificando lo más detalladamente posible) de la siguiente expresión:
+	-- map . foldr
+{-
+map:: (a -> b) -> [a] -> [b]
+foldr:: (a -> b -> b) -> b -> [a] -> b
+(.)::(b -> c) -> (a -> b) -> a -> c
+f seria map
+g seria foldr
+foldr devuelve un y/b y map recibe (a -> b), entonces vamos a reemplazar y por (a -> b)
+foldr:: (a -> (a -> b) -> (a -> b)) -> [a] -> (a -> b)
+map . foldr:: [[a]] -> [(a -> b)]
+-}

@@ -33,6 +33,13 @@ mult3F n xs = snd (foldr (\ x (i,acc)-> if x > n && mod i 3 == 1 then ((i - 1), 
 
 -- ... evaluarla utilizando modo de evaluación eager por un lado y normal order por otro (la explicación del modo de evaluación eager puede ser menos detallada).
 
+{-
+en el modo eager tenemos que evaluar todos los parametros antes de aplicar la funcion, es decir que se construiria toda la lista
+y quedaria [(3,0),(9,3)]
+el resultado es (3,0)
+en el modo normal order solo evaluamos el parametro hasta el primer constructor, es decir que head se evaluaria asi> head ((3,0): [(x,y)| x <- [9], y <- [3,2], x > y])
+resultado -> (3,0)
+-}
 -- 3)i)	Definir la función de orden superior shuffle que dadas dos listas de elementos del mismo tipo y un criterio de “mezlado” de las dos listas, retorne una 
 -- lista resultante que contenga todos los elementos unidos de las dos listas dadas donde siempre se cumple que si un elemento A aparece antes que otro B en una 
 -- de las dos listas, el elemento A aparecerá antes que B en la lista resultante. El criterio de mezclado indica para un instante dado que dadas las longitudes 
@@ -63,6 +70,7 @@ merge xs ys = shuffle xs ys (\ _ _ x y _ _ -> (x <= y))
 -- iv)	Idem ii), pero cuando una lista llegue a una cantidad dada de elementos, todos los elementos de esa lista se extraerán primero para agregarlos a la lista 
 -- resultante.
 intercalarb:: [a] -> [a] -> Int -> [a]
+-- no salio :( 
 
 -- 4)	Expresar el tipo de datos más general (justificando lo más detalladamente posible) de la siguiente expresión:
 	-- foldr head (head [])

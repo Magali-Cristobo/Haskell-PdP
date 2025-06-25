@@ -107,7 +107,7 @@ filterOS f (x:xs)  = if(f x) then (x:(filterOS f xs )) else (filterOS f xs )
 -- 6i Definir la función infija o de composición de funciones. En Haskell esta función está predefinida y se llama (.). ¿Qué restricciones habrá que hacerle respecto a la composición matemática?
 infixr 9 <.>
 (<.>):: (a -> b) -> (c -> a) -> c -> b
-f <.> g = \x-> f(g x)
+f <.> g = \x -> f(g x)
 
 -- 6 ii Definir ultimo y segundo (devuelve el segundo elemento de una lista) usando la función o.
 segundo:: [a] -> a
